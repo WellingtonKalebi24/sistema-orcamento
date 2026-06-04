@@ -1,0 +1,1314 @@
+openapi: 3.1.0
+info:
+  title: API do Sistema de Orcamentos e Ordens de Servico
+  version: 0.1.0
+  description: Contrato REST inicial do MVP. Todas as mensagens ao usuario devem ser apresentadas em pt-BR.
+servers:
+  - url: /api/v1
+security:
+  - bearerAuth: []
+tags:
+  - name: Auth
+  - name: Users
+  - name: Company
+  - name: Clients
+  - name: Services
+  - name: Products
+  - name: Stock
+  - name: Quotes
+  - name: WorkOrders
+  - name: Payments
+  - name: Dashboard
+  - name: Reports
+paths:
+  /auth/login:
+    post:
+      tags: [Auth]
+      security: []
+      summary: Autenticar usuario
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Login realizado; refresh token enviado em cookie HttpOnly.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /auth/refresh:
+    post:
+      tags: [Auth]
+      security: []
+      summary: Rotacionar sessao e emitir novo access token JWT
+      responses:
+        '200':
+          description: Token renovado e cookie rotacionado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+  /auth/logout:
+    post:
+      tags: [Auth]
+      summary: Revogar refresh token atual
+      responses:
+        '204':
+          description: Sessao encerrada.
+  /auth/me:
+    get:
+      tags: [Auth]
+      summary: Consultar usuario autenticado
+      responses:
+        '200':
+          description: Usuario corrente.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+  /users:
+    get:
+      tags: [Users]
+      summary: Listar usuarios
+      x-roles: [ADMIN]
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+        - $ref: '#/components/parameters/Search'
+      responses:
+        '200':
+          description: Lista paginada.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PagedUsers'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+    post:
+      tags: [Users]
+      summary: Criar usuario
+      x-roles: [ADMIN]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserCreate'
+      responses:
+        '201':
+          description: Usuario criado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+  /users/{id}:
+    patch:
+      tags: [Users]
+      summary: Atualizar usuario, perfil ou status
+      x-roles: [ADMIN]
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserUpdate'
+      responses:
+        '200':
+          description: Usuario atualizado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserResponse'
+  /company-settings:
+    get:
+      tags: [Company]
+      summary: Consultar configuracao empresarial
+      responses:
+        '200':
+          description: Configuracao visivel ao perfil.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CompanySettings'
+    patch:
+      tags: [Company]
+      summary: Atualizar configuracao empresarial
+      x-roles: [ADMIN]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CompanySettingsUpdate'
+      responses:
+        '200':
+          description: Configuracao atualizada e auditada.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CompanySettings'
+  /company-settings/logo:
+    post:
+      tags: [Company]
+      summary: Enviar logo da empresa
+      x-roles: [ADMIN]
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+              required: [file]
+      responses:
+        '201':
+          description: Logo registrado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Attachment'
+  /clients:
+    get:
+      tags: [Clients]
+      summary: Listar e buscar clientes ativos/inativos
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+        - $ref: '#/components/parameters/Search'
+        - $ref: '#/components/parameters/Status'
+      responses:
+        '200':
+          description: Lista paginada.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PagedClients'
+    post:
+      tags: [Clients]
+      x-roles: [ADMIN, ATENDENTE]
+      summary: Cadastrar cliente
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClientInput'
+      responses:
+        '201':
+          description: Cliente criado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Client'
+        '409':
+          $ref: '#/components/responses/Conflict'
+  /clients/{id}:
+    get:
+      tags: [Clients]
+      summary: Consultar cliente
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      responses:
+        '200':
+          description: Cliente encontrado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Client'
+    patch:
+      tags: [Clients]
+      x-roles: [ADMIN, ATENDENTE]
+      summary: Atualizar cliente
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClientInput'
+      responses:
+        '200':
+          description: Cliente atualizado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Client'
+    delete:
+      tags: [Clients]
+      x-roles: [ADMIN, ATENDENTE]
+      summary: Inativar cliente
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      responses:
+        '204':
+          description: Cliente inativado.
+  /clients/{id}/history:
+    get:
+      tags: [Clients]
+      summary: Consultar historico de orcamentos e OS
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      responses:
+        '200':
+          description: Historico conforme permissao.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClientHistory'
+  /services:
+    get:
+      tags: [Services]
+      summary: Listar servicos
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+        - $ref: '#/components/parameters/Search'
+      responses:
+        '200':
+          description: Lista paginada.
+    post:
+      tags: [Services]
+      x-roles: [ADMIN]
+      summary: Cadastrar servico
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ServiceInput'
+      responses:
+        '201':
+          description: Servico criado.
+  /services/{id}:
+    patch:
+      tags: [Services]
+      x-roles: [ADMIN]
+      summary: Atualizar ou inativar servico
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ServiceInput'
+      responses:
+        '200':
+          description: Servico atualizado.
+  /products:
+    get:
+      tags: [Products]
+      summary: Listar produtos e estoque
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+        - $ref: '#/components/parameters/Search'
+        - name: lowStock
+          in: query
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Lista paginada de produtos.
+    post:
+      tags: [Products]
+      x-roles: [ADMIN]
+      summary: Cadastrar produto
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductInput'
+      responses:
+        '201':
+          description: Produto criado.
+  /products/{id}:
+    patch:
+      tags: [Products]
+      x-roles: [ADMIN]
+      summary: Atualizar ou inativar produto
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductInput'
+      responses:
+        '200':
+          description: Produto atualizado.
+  /products/{id}/stock-movements:
+    post:
+      tags: [Stock]
+      x-roles: [ADMIN]
+      summary: Registrar entrada, saida ou ajuste manual
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StockMovementInput'
+      responses:
+        '201':
+          description: Movimento registrado com novo saldo.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StockMovement'
+        '409':
+          $ref: '#/components/responses/InsufficientStock'
+  /stock-movements:
+    get:
+      tags: [Stock]
+      summary: Consultar historico de movimentos
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+        - name: productId
+          in: query
+          schema:
+            type: string
+            format: uuid
+        - $ref: '#/components/parameters/From'
+        - $ref: '#/components/parameters/To'
+      responses:
+        '200':
+          description: Historico paginado.
+  /quotes:
+    get:
+      tags: [Quotes]
+      summary: Listar orcamentos
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+        - $ref: '#/components/parameters/Search'
+        - name: status
+          in: query
+          schema:
+            $ref: '#/components/schemas/QuoteStatus'
+        - $ref: '#/components/parameters/From'
+        - $ref: '#/components/parameters/To'
+      responses:
+        '200':
+          description: Lista paginada.
+    post:
+      tags: [Quotes]
+      x-roles: [ADMIN, ATENDENTE]
+      summary: Criar orcamento sem movimentar estoque
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QuoteInput'
+      responses:
+        '201':
+          description: Orcamento calculado e salvo como rascunho.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Quote'
+  /quotes/{id}:
+    get:
+      tags: [Quotes]
+      summary: Consultar orcamento detalhado
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      responses:
+        '200':
+          description: Orcamento.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Quote'
+    patch:
+      tags: [Quotes]
+      x-roles: [ADMIN, ATENDENTE]
+      summary: Editar orcamento em rascunho
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/QuoteInput'
+      responses:
+        '200':
+          description: Orcamento recalculado.
+  /quotes/{id}/status:
+    patch:
+      tags: [Quotes]
+      x-roles: [ADMIN, ATENDENTE]
+      summary: Alterar status do orcamento
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  $ref: '#/components/schemas/QuoteStatus'
+                note:
+                  type: string
+              required: [status]
+      responses:
+        '200':
+          description: Status atualizado e auditado.
+        '409':
+          $ref: '#/components/responses/Conflict'
+  /quotes/{id}/pdf:
+    get:
+      tags: [Quotes]
+      summary: Baixar PDF profissional do orcamento
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      responses:
+        '200':
+          description: Documento PDF.
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+  /quotes/{id}/work-order:
+    post:
+      tags: [WorkOrders]
+      x-roles: [ADMIN, ATENDENTE]
+      summary: Converter orcamento aprovado em OS unica
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WorkOrderConversionInput'
+      responses:
+        '201':
+          description: Ordem criada.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkOrder'
+        '409':
+          $ref: '#/components/responses/Conflict'
+  /work-orders:
+    get:
+      tags: [WorkOrders]
+      summary: Listar ordens permitidas ao usuario
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+        - $ref: '#/components/parameters/Search'
+        - name: status
+          in: query
+          schema:
+            $ref: '#/components/schemas/WorkOrderStatus'
+        - name: technicianId
+          in: query
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Lista paginada.
+    post:
+      tags: [WorkOrders]
+      x-roles: [ADMIN, ATENDENTE]
+      summary: Criar ordem manual
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WorkOrderInput'
+      responses:
+        '201':
+          description: Ordem aberta.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkOrder'
+  /work-orders/{id}:
+    get:
+      tags: [WorkOrders]
+      summary: Consultar ordem
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      responses:
+        '200':
+          description: Ordem detalhada.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkOrder'
+    patch:
+      tags: [WorkOrders]
+      summary: Atualizar ordem em execucao conforme papel
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WorkOrderUpdate'
+      responses:
+        '200':
+          description: Ordem atualizada.
+        '409':
+          $ref: '#/components/responses/Conflict'
+  /work-orders/{id}/complete:
+    post:
+      tags: [WorkOrders]
+      x-roles: [ADMIN, TECNICO]
+      summary: Concluir ordem e dar baixa atomica no estoque
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      responses:
+        '200':
+          description: Ordem concluida e movimentos criados.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkOrder'
+        '409':
+          $ref: '#/components/responses/InsufficientStock'
+  /work-orders/{id}/attachments:
+    get:
+      tags: [WorkOrders]
+      summary: Listar anexos da ordem
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      responses:
+        '200':
+          description: Anexos autorizados.
+    post:
+      tags: [WorkOrders]
+      x-roles: [ADMIN, TECNICO]
+      summary: Anexar foto, documento ou aceite
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                type:
+                  $ref: '#/components/schemas/AttachmentType'
+                file:
+                  type: string
+                  format: binary
+              required: [type, file]
+      responses:
+        '201':
+          description: Anexo salvo.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Attachment'
+  /payments:
+    get:
+      tags: [Payments]
+      x-roles: [ADMIN, FINANCEIRO]
+      summary: Listar pagamentos por filtros
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+        - $ref: '#/components/parameters/From'
+        - $ref: '#/components/parameters/To'
+      responses:
+        '200':
+          description: Pagamentos paginados.
+    post:
+      tags: [Payments]
+      x-roles: [ADMIN, FINANCEIRO]
+      summary: Registrar pagamento
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaymentInput'
+      responses:
+        '201':
+          description: Pagamento registrado.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Payment'
+  /payments/{id}:
+    patch:
+      tags: [Payments]
+      x-roles: [ADMIN, FINANCEIRO]
+      summary: Atualizar situacao ou registrar recebimento
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaymentInput'
+      responses:
+        '200':
+          description: Pagamento atualizado.
+  /dashboard/summary:
+    get:
+      tags: [Dashboard]
+      summary: Obter cards e listas recentes permitidos
+      parameters:
+        - $ref: '#/components/parameters/From'
+        - $ref: '#/components/parameters/To'
+      responses:
+        '200':
+          description: Indicadores por perfil.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DashboardSummary'
+  /dashboard/revenue:
+    get:
+      tags: [Dashboard]
+      x-roles: [ADMIN, FINANCEIRO]
+      summary: Obter serie mensal de faturamento recebido
+      responses:
+        '200':
+          description: Pontos do grafico.
+  /dashboard/quote-status:
+    get:
+      tags: [Dashboard]
+      summary: Obter distribuicao de status de orcamentos
+      responses:
+        '200':
+          description: Distribuicao no periodo.
+  /dashboard/top-products:
+    get:
+      tags: [Dashboard]
+      summary: Obter produtos mais usados em OS concluidas
+      responses:
+        '200':
+          description: Ranking de produtos.
+  /reports/{reportType}:
+    get:
+      tags: [Reports]
+      x-roles: [ADMIN, FINANCEIRO]
+      summary: Consultar relatorio simples por periodo
+      parameters:
+        - name: reportType
+          in: path
+          required: true
+          schema:
+            type: string
+            enum: [quotes, work-orders, payments, profitability, stock]
+        - $ref: '#/components/parameters/From'
+        - $ref: '#/components/parameters/To'
+      responses:
+        '200':
+          description: Linhas e totais do relatorio autorizado.
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  parameters:
+    Id:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    Page:
+      name: page
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+    PageSize:
+      name: pageSize
+      in: query
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 20
+    Search:
+      name: search
+      in: query
+      schema:
+        type: string
+        maxLength: 100
+    Status:
+      name: status
+      in: query
+      schema:
+        $ref: '#/components/schemas/RecordStatus'
+    From:
+      name: from
+      in: query
+      schema:
+        type: string
+        format: date
+    To:
+      name: to
+      in: query
+      schema:
+        type: string
+        format: date
+  responses:
+    Unauthorized:
+      description: Credencial ausente ou invalida.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Forbidden:
+      description: Usuario sem permissao.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    Conflict:
+      description: Estado ou unicidade impede a operacao.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+    InsufficientStock:
+      description: Saldo insuficiente ou conflito de conclusao.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+  schemas:
+    UserRole:
+      type: string
+      enum: [ADMIN, ATENDENTE, TECNICO, FINANCEIRO]
+    RecordStatus:
+      type: string
+      enum: [ACTIVE, INACTIVE]
+    QuoteStatus:
+      type: string
+      enum: [RASCUNHO, ENVIADO, APROVADO, RECUSADO, EXPIRADO]
+    WorkOrderStatus:
+      type: string
+      enum: [ABERTA, EM_ANDAMENTO, AGUARDANDO_PECA, CONCLUIDA, CANCELADA]
+    ItemType:
+      type: string
+      enum: [SERVICE, PRODUCT]
+    PaymentStatus:
+      type: string
+      enum: [PENDENTE, PARCIAL, PAGO, CANCELADO]
+    PaymentMethod:
+      type: string
+      enum: [DINHEIRO, PIX, CARTAO, BOLETO, TRANSFERENCIA]
+    AttachmentType:
+      type: string
+      enum: [COMPANY_LOGO, WORK_ORDER_PHOTO, WORK_ORDER_DOCUMENT, CLIENT_ACCEPTANCE]
+    Money:
+      type: string
+      pattern: '^\d+(\.\d{1,2})?$'
+      examples: ['1250.90']
+    Quantity:
+      type: string
+      pattern: '^\d+(\.\d{1,3})?$'
+      examples: ['2.000']
+    LoginRequest:
+      type: object
+      required: [email, password]
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          minLength: 8
+          maxLength: 72
+    AuthResponse:
+      type: object
+      required: [success, data]
+      properties:
+        success:
+          const: true
+        data:
+          type: object
+          required: [accessToken, user]
+          properties:
+            accessToken:
+              type: string
+            user:
+              $ref: '#/components/schemas/UserResponse'
+    UserCreate:
+      type: object
+      required: [name, email, password, role]
+      properties:
+        name:
+          type: string
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          minLength: 8
+          maxLength: 72
+        role:
+          $ref: '#/components/schemas/UserRole'
+    UserUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+        role:
+          $ref: '#/components/schemas/UserRole'
+        status:
+          $ref: '#/components/schemas/RecordStatus'
+    UserResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        email:
+          type: string
+        role:
+          $ref: '#/components/schemas/UserRole'
+        status:
+          $ref: '#/components/schemas/RecordStatus'
+    ClientInput:
+      type: object
+      required: [name, personType, document]
+      properties:
+        name:
+          type: string
+        personType:
+          type: string
+          enum: [PF, PJ]
+        document:
+          type: string
+        phone:
+          type: string
+        whatsapp:
+          type: string
+        email:
+          type: string
+          format: email
+        address:
+          type: object
+          additionalProperties:
+            type: string
+        notes:
+          type: string
+        status:
+          $ref: '#/components/schemas/RecordStatus'
+    Client:
+      allOf:
+        - $ref: '#/components/schemas/ClientInput'
+        - type: object
+          properties:
+            id:
+              type: string
+              format: uuid
+            createdAt:
+              type: string
+              format: date-time
+    ServiceInput:
+      type: object
+      required: [name, description, category, defaultPrice, estimatedMinutes]
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        category:
+          type: string
+        defaultPrice:
+          $ref: '#/components/schemas/Money'
+        estimatedMinutes:
+          type: integer
+          minimum: 1
+        status:
+          $ref: '#/components/schemas/RecordStatus'
+    ProductInput:
+      type: object
+      required: [name, sku, category, unit, minimumStock, costPrice, salePrice]
+      properties:
+        name:
+          type: string
+        sku:
+          type: string
+        category:
+          type: string
+        supplier:
+          type: string
+        unit:
+          type: string
+        minimumStock:
+          $ref: '#/components/schemas/Quantity'
+        costPrice:
+          $ref: '#/components/schemas/Money'
+        salePrice:
+          $ref: '#/components/schemas/Money'
+        status:
+          $ref: '#/components/schemas/RecordStatus'
+    StockMovementInput:
+      type: object
+      required: [type, quantity, reason]
+      properties:
+        type:
+          type: string
+          enum: [ENTRY, EXIT, ADJUSTMENT]
+        quantity:
+          $ref: '#/components/schemas/Quantity'
+        reason:
+          type: string
+    StockMovement:
+      allOf:
+        - $ref: '#/components/schemas/StockMovementInput'
+        - type: object
+          properties:
+            id:
+              type: string
+              format: uuid
+            previousBalance:
+              $ref: '#/components/schemas/Quantity'
+            newBalance:
+              $ref: '#/components/schemas/Quantity'
+    QuoteItemInput:
+      type: object
+      required: [type, quantity, unitPrice, discountAmount]
+      properties:
+        type:
+          $ref: '#/components/schemas/ItemType'
+        productId:
+          type: string
+          format: uuid
+        serviceId:
+          type: string
+          format: uuid
+        quantity:
+          $ref: '#/components/schemas/Quantity'
+        unitPrice:
+          $ref: '#/components/schemas/Money'
+        discountAmount:
+          $ref: '#/components/schemas/Money'
+    QuoteInput:
+      type: object
+      required: [clientId, validUntil, requestDescription, items]
+      properties:
+        clientId:
+          type: string
+          format: uuid
+        validUntil:
+          type: string
+          format: date
+        requestDescription:
+          type: string
+        items:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/QuoteItemInput'
+        laborAmount:
+          $ref: '#/components/schemas/Money'
+        travelFee:
+          $ref: '#/components/schemas/Money'
+        generalDiscount:
+          $ref: '#/components/schemas/Money'
+        paymentTerms:
+          type: string
+        executionDeadline:
+          type: string
+        notes:
+          type: string
+    Quote:
+      allOf:
+        - $ref: '#/components/schemas/QuoteInput'
+        - type: object
+          properties:
+            id:
+              type: string
+              format: uuid
+            number:
+              type: string
+            status:
+              $ref: '#/components/schemas/QuoteStatus'
+            totalAmount:
+              $ref: '#/components/schemas/Money'
+            estimatedProfit:
+              $ref: '#/components/schemas/Money'
+    WorkOrderItemInput:
+      type: object
+      required: [type, plannedQuantity, usedQuantity]
+      properties:
+        type:
+          $ref: '#/components/schemas/ItemType'
+        productId:
+          type: string
+          format: uuid
+        serviceId:
+          type: string
+          format: uuid
+        plannedQuantity:
+          $ref: '#/components/schemas/Quantity'
+        usedQuantity:
+          $ref: '#/components/schemas/Quantity'
+    WorkOrderInput:
+      type: object
+      required: [clientId, problemDescription, items]
+      properties:
+        clientId:
+          type: string
+          format: uuid
+        technicianId:
+          type: string
+          format: uuid
+        expectedAt:
+          type: string
+          format: date-time
+        problemDescription:
+          type: string
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/WorkOrderItemInput'
+        internalNotes:
+          type: string
+        clientNotes:
+          type: string
+    WorkOrderConversionInput:
+      type: object
+      properties:
+        technicianId:
+          type: string
+          format: uuid
+        expectedAt:
+          type: string
+          format: date-time
+    WorkOrderUpdate:
+      type: object
+      properties:
+        technicianId:
+          type: string
+          format: uuid
+        expectedAt:
+          type: string
+          format: date-time
+        status:
+          $ref: '#/components/schemas/WorkOrderStatus'
+        executionDescription:
+          type: string
+        internalNotes:
+          type: string
+        clientNotes:
+          type: string
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/WorkOrderItemInput'
+    WorkOrder:
+      allOf:
+        - $ref: '#/components/schemas/WorkOrderInput'
+        - type: object
+          properties:
+            id:
+              type: string
+              format: uuid
+            number:
+              type: string
+            quoteId:
+              type: [string, 'null']
+              format: uuid
+            status:
+              $ref: '#/components/schemas/WorkOrderStatus'
+            stockDeductedAt:
+              type: [string, 'null']
+              format: date-time
+    PaymentInput:
+      type: object
+      properties:
+        quoteId:
+          type: string
+          format: uuid
+        workOrderId:
+          type: string
+          format: uuid
+        method:
+          $ref: '#/components/schemas/PaymentMethod'
+        status:
+          $ref: '#/components/schemas/PaymentStatus'
+        amount:
+          $ref: '#/components/schemas/Money'
+        paidAmount:
+          $ref: '#/components/schemas/Money'
+        dueDate:
+          type: string
+          format: date
+        paidAt:
+          type: string
+          format: date-time
+        notes:
+          type: string
+      required: [method, status, amount]
+    Payment:
+      allOf:
+        - $ref: '#/components/schemas/PaymentInput'
+        - type: object
+          properties:
+            id:
+              type: string
+              format: uuid
+    CompanySettingsUpdate:
+      type: object
+      properties:
+        companyName:
+          type: string
+        cnpj:
+          type: string
+        phone:
+          type: string
+        whatsapp:
+          type: string
+        email:
+          type: string
+          format: email
+        address:
+          type: string
+        pixKey:
+          type: string
+        bankDetails:
+          type: string
+        defaultQuoteText:
+          type: string
+        defaultPdfFooter:
+          type: string
+        allowNegativeStock:
+          type: boolean
+    CompanySettings:
+      allOf:
+        - $ref: '#/components/schemas/CompanySettingsUpdate'
+        - type: object
+          properties:
+            id:
+              type: string
+              format: uuid
+            logoAttachmentId:
+              type: [string, 'null']
+              format: uuid
+    Attachment:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        type:
+          $ref: '#/components/schemas/AttachmentType'
+        originalName:
+          type: string
+        mimeType:
+          type: string
+        sizeBytes:
+          type: integer
+    DashboardSummary:
+      type: object
+      properties:
+        quotesTotal:
+          type: integer
+        quotesApproved:
+          type: integer
+        quotesRejected:
+          type: integer
+        monthlyRevenue:
+          $ref: '#/components/schemas/Money'
+        estimatedProfit:
+          $ref: '#/components/schemas/Money'
+        openWorkOrders:
+          type: integer
+        inProgressServices:
+          type: integer
+        lowStockProducts:
+          type: integer
+        clientsTotal:
+          type: integer
+    ClientHistory:
+      type: object
+      properties:
+        quotes:
+          type: array
+          items:
+            $ref: '#/components/schemas/Quote'
+        workOrders:
+          type: array
+          items:
+            $ref: '#/components/schemas/WorkOrder'
+    Pagination:
+      type: object
+      properties:
+        page:
+          type: integer
+        pageSize:
+          type: integer
+        total:
+          type: integer
+    PagedUsers:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserResponse'
+        meta:
+          $ref: '#/components/schemas/Pagination'
+    PagedClients:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Client'
+        meta:
+          $ref: '#/components/schemas/Pagination'
+    ErrorResponse:
+      type: object
+      properties:
+        success:
+          const: false
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+            message:
+              type: string
+            details:
+              type: array
+              items:
+                type: object
+        requestId:
+          type: string

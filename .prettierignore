@@ -1,0 +1,10 @@
+node_modules/
+dist/
+build/
+coverage/
+backend/uploads/
+backend/storage/
+package-lock.json
+specs/
+.agents/
+.specify/
