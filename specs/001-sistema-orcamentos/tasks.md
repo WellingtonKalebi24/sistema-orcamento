@@ -41,26 +41,26 @@
 
 **Critico**: Nenhuma historia de usuario deve ser iniciada antes desta fase concluir, pois todos os dados sao protegidos e usam os mesmos modelos/transacoes.
 
-- [ ] T013 Implementar enums, modelos, relacionamentos, decimais, soft delete e indices Prisma definidos no desenho em `backend/prisma/schema.prisma`
-- [ ] T014 Criar migracao inicial com constraints SQL para vinculos XOR, unicidades e protecoes documentais em `backend/prisma/migrations/000001_initial_schema/migration.sql`
-- [ ] T015 Criar seed reproduzivel com empresa inicial, administrador e dados demonstrativos basicos em `backend/prisma/seed.ts`
-- [ ] T016 Configurar leitura validada de ambiente e cliente Prisma compartilhado em `backend/src/config/env.ts` e `backend/src/config/prisma.ts`
-- [ ] T017 [P] Implementar envelope HTTP, `AppError`, request id e middleware de erros em `backend/src/utils/app-error.ts`, `backend/src/utils/api-response.ts`, `backend/src/middlewares/request-id.middleware.ts` e `backend/src/middlewares/error.middleware.ts`
-- [ ] T018 [P] Implementar logger sem dados sensiveis, Helmet, CORS, limites de corpo e rate limit em `backend/src/config/logger.ts` e `backend/src/middlewares/security.middleware.ts`
-- [ ] T019 [P] Implementar schemas comuns de paginacao/filtros e utilitarios seguros de decimal, documentos e datas em `backend/src/validators/common.schemas.ts`, `backend/src/utils/money.ts`, `backend/src/utils/documents.ts` e `backend/src/utils/dates.ts`
-- [ ] T020 Implementar repositorios compartilhados de auditoria e sequencia numerica transacional em `backend/src/repositories/audit-log.repository.ts`, `backend/src/repositories/document-sequence.repository.ts` e `backend/src/services/audit.service.ts`
-- [ ] T021 [P] Implementar abstracao de armazenamento local protegido para logos/anexos em `backend/src/providers/storage/storage-provider.ts` e `backend/src/providers/storage/local-storage.provider.ts`
-- [ ] T022 Implementar schemas de login/refresh e providers de bcrypt/JWT/refresh opaco em `backend/src/validators/auth.schemas.ts`, `backend/src/providers/auth/password.provider.ts` e `backend/src/providers/auth/token.provider.ts`
-- [ ] T023 Implementar persistencia e regras de sessao rotativa/revogavel em `backend/src/repositories/user.repository.ts`, `backend/src/repositories/refresh-token.repository.ts` e `backend/src/services/auth.service.ts`
-- [ ] T024 Implementar endpoints de login, refresh, logout e usuario corrente com middlewares RBAC em `backend/src/controllers/auth.controller.ts`, `backend/src/routes/auth.routes.ts`, `backend/src/middlewares/authenticate.middleware.ts` e `backend/src/middlewares/authorize.middleware.ts`
-- [ ] T025 [P] Escrever testes unitarios de credenciais, tokens e revogacao antes da estabilizacao da autenticacao em `backend/tests/unit/services/auth.service.spec.ts`
-- [ ] T026 Escrever testes de integracao de login, refresh, logout e negacao por perfil em `backend/tests/integration/auth.routes.spec.ts`
-- [ ] T027 Registrar as rotas versionadas e middlewares comuns na aplicacao Express em `backend/src/routes/index.ts` e `backend/src/app.ts`
-- [ ] T028 [P] Gerar/consumir tipos iniciais do contrato e configurar cliente HTTP com renovacao controlada em `frontend/src/lib/api/schema.d.ts` e `frontend/src/lib/api/client.ts`
-- [ ] T029 [P] Implementar estado de sessao em memoria, provider e formulario de login em `frontend/src/store/auth.store.ts`, `frontend/src/features/auth/AuthProvider.tsx` e `frontend/src/features/auth/pages/LoginPage.tsx`
-- [ ] T030 Implementar roteamento protegido, matriz de permissao e layout com sidebar em `frontend/src/app/router.tsx`, `frontend/src/app/permissions.ts`, `frontend/src/components/layout/ProtectedRoute.tsx` e `frontend/src/components/layout/AppLayout.tsx`
-- [ ] T031 Criar helpers de banco e fixtures autenticadas para testes de integracao em `backend/tests/helpers/database.ts` e `backend/tests/fixtures/auth.fixture.ts`
-- [ ] T032 Executar e corrigir gates iniciais de migracao, seed, lint, typecheck e autenticacao em `backend/tests/integration/auth.routes.spec.ts` e `README.md`
+- [X] T013 Implementar enums, modelos, relacionamentos, decimais, soft delete e indices Prisma definidos no desenho em `backend/prisma/schema.prisma`
+- [X] T014 Criar migracao inicial com constraints SQL para vinculos XOR, unicidades e protecoes documentais em `backend/prisma/migrations/000001_initial_schema/migration.sql`
+- [X] T015 Criar seed reproduzivel com empresa inicial, administrador e dados demonstrativos basicos em `backend/prisma/seed.ts`
+- [X] T016 Configurar leitura validada de ambiente e cliente Prisma compartilhado em `backend/src/config/env.ts` e `backend/src/config/prisma.ts`
+- [X] T017 [P] Implementar envelope HTTP, `AppError`, request id e middleware de erros em `backend/src/utils/app-error.ts`, `backend/src/utils/api-response.ts`, `backend/src/middlewares/request-id.middleware.ts` e `backend/src/middlewares/error.middleware.ts`
+- [X] T018 [P] Implementar logger sem dados sensiveis, Helmet, CORS, limites de corpo e rate limit em `backend/src/config/logger.ts` e `backend/src/middlewares/security.middleware.ts`
+- [X] T019 [P] Implementar schemas comuns de paginacao/filtros e utilitarios seguros de decimal, documentos e datas em `backend/src/validators/common.schemas.ts`, `backend/src/utils/money.ts`, `backend/src/utils/documents.ts` e `backend/src/utils/dates.ts`
+- [X] T020 Implementar repositorios compartilhados de auditoria e sequencia numerica transacional em `backend/src/repositories/audit-log.repository.ts`, `backend/src/repositories/document-sequence.repository.ts` e `backend/src/services/audit.service.ts`
+- [X] T021 [P] Implementar abstracao de armazenamento local protegido para logos/anexos em `backend/src/providers/storage/storage-provider.ts` e `backend/src/providers/storage/local-storage.provider.ts`
+- [X] T022 Implementar schemas de login/refresh e providers de bcrypt/JWT/refresh opaco em `backend/src/validators/auth.schemas.ts`, `backend/src/providers/auth/password.provider.ts` e `backend/src/providers/auth/token.provider.ts`
+- [X] T023 Implementar persistencia e regras de sessao rotativa/revogavel em `backend/src/repositories/user.repository.ts`, `backend/src/repositories/refresh-token.repository.ts` e `backend/src/services/auth.service.ts`
+- [X] T024 Implementar endpoints de login, refresh, logout e usuario corrente com middlewares RBAC em `backend/src/controllers/auth.controller.ts`, `backend/src/routes/auth.routes.ts`, `backend/src/middlewares/authenticate.middleware.ts` e `backend/src/middlewares/authorize.middleware.ts`
+- [X] T025 [P] Escrever testes unitarios de credenciais, tokens e revogacao antes da estabilizacao da autenticacao em `backend/tests/unit/services/auth.service.spec.ts`
+- [X] T026 Escrever testes de integracao de login, refresh, logout e negacao por perfil em `backend/tests/integration/auth.routes.spec.ts`
+- [X] T027 Registrar as rotas versionadas e middlewares comuns na aplicacao Express em `backend/src/routes/index.ts` e `backend/src/app.ts`
+- [X] T028 [P] Gerar/consumir tipos iniciais do contrato e configurar cliente HTTP com renovacao controlada em `frontend/src/lib/api/schema.d.ts` e `frontend/src/lib/api/client.ts`
+- [X] T029 [P] Implementar estado de sessao em memoria, provider e formulario de login em `frontend/src/store/auth.store.ts`, `frontend/src/features/auth/AuthProvider.tsx` e `frontend/src/features/auth/pages/LoginPage.tsx`
+- [X] T030 Implementar roteamento protegido, matriz de permissao e layout com sidebar em `frontend/src/app/router.tsx`, `frontend/src/app/permissions.ts`, `frontend/src/components/layout/ProtectedRoute.tsx` e `frontend/src/components/layout/AppLayout.tsx`
+- [X] T031 Criar helpers de banco e fixtures autenticadas para testes de integracao em `backend/tests/helpers/database.ts` e `backend/tests/fixtures/auth.fixture.ts`
+- [X] T032 Executar e corrigir gates iniciais de migracao, seed, lint, typecheck e autenticacao em `backend/tests/integration/auth.routes.spec.ts` e `README.md`
 
 **Checkpoint**: Banco migravel, login JWT/refresh funcionando, rotas protegidas e layout autenticado prontos para receber os incrementos.
 
@@ -74,29 +74,29 @@
 
 ### Testes para User Story 1
 
-- [ ] T033 [P] [US1] Escrever testes unitarios dos calculos de itens, descontos, taxa, mao de obra, custo e lucro com decimal em `backend/tests/unit/services/quote-calculator.spec.ts`
-- [ ] T034 [P] [US1] Escrever testes de integracao para criar, editar rascunho, enviar, aprovar/recusar/expirar e filtrar orcamentos sem baixa de estoque em `backend/tests/integration/quotes.routes.spec.ts`
-- [ ] T035 [P] [US1] Escrever teste de integracao do download PDF e preservacao de snapshots apos alterar catalogo/empresa em `backend/tests/integration/quote-pdf.routes.spec.ts`
+- [X] T033 [P] [US1] Escrever testes unitarios dos calculos de itens, descontos, taxa, mao de obra, custo e lucro com decimal em `backend/tests/unit/services/quote-calculator.spec.ts`
+- [X] T034 [P] [US1] Escrever testes de integracao para criar, editar rascunho, enviar, aprovar/recusar/expirar e filtrar orcamentos sem baixa de estoque em `backend/tests/integration/quotes.routes.spec.ts`
+- [X] T035 [P] [US1] Escrever teste de integracao do download PDF e preservacao de snapshots apos alterar catalogo/empresa em `backend/tests/integration/quote-pdf.routes.spec.ts`
 
 ### Implementacao para User Story 1
 
-- [ ] T036 [P] [US1] Implementar cadastro e consulta minima de clientes necessarios ao orcamento em `backend/src/validators/client.schemas.ts`, `backend/src/repositories/client.repository.ts`, `backend/src/services/client.service.ts`, `backend/src/controllers/client.controller.ts` e `backend/src/routes/client.routes.ts`
-- [ ] T037 [P] [US1] Implementar consulta/criacao minima de produtos e servicos para selecao do orcamento em `backend/src/repositories/product.repository.ts`, `backend/src/repositories/service.repository.ts`, `backend/src/services/catalog.service.ts`, `backend/src/controllers/catalog.controller.ts` e `backend/src/routes/catalog.routes.ts`
-- [ ] T038 [P] [US1] Implementar leitura interna de configuracao empresarial para snapshots e PDF em `backend/src/repositories/company-settings.repository.ts` e `backend/src/services/company-settings.service.ts`
-- [ ] T039 [US1] Implementar validacao Zod dos itens e comandos de orcamento conforme OpenAPI em `backend/src/validators/quote.schemas.ts`
-- [ ] T040 [US1] Implementar persistencia de orcamentos, itens, filtros e snapshots em `backend/src/repositories/quote.repository.ts`
-- [ ] T041 [US1] Implementar calculadora decimal centralizada para precos, descontos, custo e lucro em `backend/src/services/quote-calculator.service.ts`
-- [ ] T042 [US1] Implementar criacao, edicao de rascunho e transicoes de status auditadas sem movimentar estoque em `backend/src/services/quote.service.ts`
-- [ ] T043 [US1] Expor endpoints de clientes/catalogo e orcamentos com RBAC de atendente/admin em `backend/src/controllers/quote.controller.ts`, `backend/src/routes/quote.routes.ts` e `backend/src/routes/index.ts`
-- [ ] T044 [US1] Implementar PDFKit com layout A4, logo opcional, tabelas, aceite e rodape a partir de snapshots em `backend/src/providers/pdf/quote-pdf.provider.ts` e `backend/src/services/quote-pdf.service.ts`
-- [ ] T045 [US1] Expor download autorizado do PDF com nome de arquivo consistente em `backend/src/controllers/quote-pdf.controller.ts` e `backend/src/routes/quote.routes.ts`
-- [ ] T046 [P] [US1] Implementar formularios e busca minima de cliente para orcamento em `frontend/src/features/clients/pages/NewClientPage.tsx`, `frontend/src/features/clients/components/ClientPicker.tsx` e `frontend/src/features/clients/api/clients.api.ts`
-- [ ] T047 [P] [US1] Implementar seletores de produto/servico e formatadores de moeda/CPF/CNPJ em `frontend/src/features/quotes/components/CatalogItemPicker.tsx`, `frontend/src/lib/formatters/currency.ts` e `frontend/src/lib/masks/documents.ts`
-- [ ] T048 [US1] Implementar hooks de API e schema de formulario de orcamento em `frontend/src/features/quotes/api/quotes.api.ts` e `frontend/src/features/quotes/validation/quote.schema.ts`
-- [ ] T049 [US1] Implementar pagina de novo orcamento com itens, descontos e resumo calculado em `frontend/src/features/quotes/pages/NewQuotePage.tsx` e `frontend/src/features/quotes/components/QuoteForm.tsx`
-- [ ] T050 [P] [US1] Implementar listagem filtravel e detalhe com status/PDF em `frontend/src/features/quotes/pages/QuotesPage.tsx`, `frontend/src/features/quotes/pages/QuoteDetailPage.tsx` e `frontend/src/features/quotes/components/QuoteStatusActions.tsx`
-- [ ] T051 [US1] Registrar rotas frontend e navegacao do modulo de orcamentos/clientes em `frontend/src/app/router.tsx` e `frontend/src/components/layout/AppSidebar.tsx`
-- [ ] T052 [US1] Executar testes Jest de US1 e registrar roteiro manual do PDF/orcamento no MVP em `backend/tests/integration/quotes.routes.spec.ts`, `backend/tests/integration/quote-pdf.routes.spec.ts` e `README.md`
+- [X] T036 [P] [US1] Implementar cadastro e consulta minima de clientes necessarios ao orcamento em `backend/src/validators/client.schemas.ts`, `backend/src/repositories/client.repository.ts`, `backend/src/services/client.service.ts`, `backend/src/controllers/client.controller.ts` e `backend/src/routes/client.routes.ts`
+- [X] T037 [P] [US1] Implementar consulta/criacao minima de produtos e servicos para selecao do orcamento em `backend/src/repositories/product.repository.ts`, `backend/src/repositories/service.repository.ts`, `backend/src/services/catalog.service.ts`, `backend/src/controllers/catalog.controller.ts` e `backend/src/routes/catalog.routes.ts`
+- [X] T038 [P] [US1] Implementar leitura interna de configuracao empresarial para snapshots e PDF em `backend/src/repositories/company-settings.repository.ts` e `backend/src/services/company-settings.service.ts`
+- [X] T039 [US1] Implementar validacao Zod dos itens e comandos de orcamento conforme OpenAPI em `backend/src/validators/quote.schemas.ts`
+- [X] T040 [US1] Implementar persistencia de orcamentos, itens, filtros e snapshots em `backend/src/repositories/quote.repository.ts`
+- [X] T041 [US1] Implementar calculadora decimal centralizada para precos, descontos, custo e lucro em `backend/src/services/quote-calculator.service.ts`
+- [X] T042 [US1] Implementar criacao, edicao de rascunho e transicoes de status auditadas sem movimentar estoque em `backend/src/services/quote.service.ts`
+- [X] T043 [US1] Expor endpoints de clientes/catalogo e orcamentos com RBAC de atendente/admin em `backend/src/controllers/quote.controller.ts`, `backend/src/routes/quote.routes.ts` e `backend/src/routes/index.ts`
+- [X] T044 [US1] Implementar PDFKit com layout A4, logo opcional, tabelas, aceite e rodape a partir de snapshots em `backend/src/providers/pdf/quote-pdf.provider.ts` e `backend/src/services/quote-pdf.service.ts`
+- [X] T045 [US1] Expor download autorizado do PDF com nome de arquivo consistente em `backend/src/controllers/quote-pdf.controller.ts` e `backend/src/routes/quote.routes.ts`
+- [X] T046 [P] [US1] Implementar formularios e busca minima de cliente para orcamento em `frontend/src/features/clients/pages/NewClientPage.tsx`, `frontend/src/features/clients/components/ClientPicker.tsx` e `frontend/src/features/clients/api/clients.api.ts`
+- [X] T047 [P] [US1] Implementar seletores de produto/servico e formatadores de moeda/CPF/CNPJ em `frontend/src/features/quotes/components/CatalogItemPicker.tsx`, `frontend/src/lib/formatters/currency.ts` e `frontend/src/lib/masks/documents.ts`
+- [X] T048 [US1] Implementar hooks de API e schema de formulario de orcamento em `frontend/src/features/quotes/api/quotes.api.ts` e `frontend/src/features/quotes/validation/quote.schema.ts`
+- [X] T049 [US1] Implementar pagina de novo orcamento com itens, descontos e resumo calculado em `frontend/src/features/quotes/pages/NewQuotePage.tsx` e `frontend/src/features/quotes/components/QuoteForm.tsx`
+- [X] T050 [P] [US1] Implementar listagem filtravel e detalhe com status/PDF em `frontend/src/features/quotes/pages/QuotesPage.tsx`, `frontend/src/features/quotes/pages/QuoteDetailPage.tsx` e `frontend/src/features/quotes/components/QuoteStatusActions.tsx`
+- [X] T051 [US1] Registrar rotas frontend e navegacao do modulo de orcamentos/clientes em `frontend/src/app/router.tsx` e `frontend/src/components/layout/AppSidebar.tsx`
+- [X] T052 [US1] Executar testes Jest de US1 e registrar roteiro manual do PDF/orcamento no MVP em `backend/tests/integration/quotes.routes.spec.ts`, `backend/tests/integration/quote-pdf.routes.spec.ts` e `README.md`
 
 **Checkpoint**: O MVP comercial inicial emite e aprova orcamentos com PDF, sem alterar estoque, usando autenticacao e permissoes.
 

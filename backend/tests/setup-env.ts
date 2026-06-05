@@ -1,2 +1,10 @@
 process.env.NODE_ENV = "test";
-process.env.PORT = "0";
+process.env.PORT = "3333";
+process.env.DATABASE_URL ??=
+  "postgresql://orcamento:orcamento_local@localhost:5433/orcamento_test?schema=public";
+process.env.TEST_DATABASE_URL ??= process.env.DATABASE_URL;
+process.env.JWT_PRIVATE_KEY ??= "test-secret-with-more-than-sixteen-chars";
+process.env.JWT_ISSUER ??= "sistema-orcamento";
+process.env.JWT_AUDIENCE ??= "sistema-orcamento-web";
+process.env.CORS_ORIGIN ??= "http://localhost:5173";
+process.env.UPLOAD_DIR ??= "./backend/uploads-test";

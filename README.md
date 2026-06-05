@@ -4,7 +4,7 @@ Aplicacao web para empresas de manutencao e assistencia tecnica, planejada com f
 
 ## Estado Atual
 
-Esta implementacao cobre a fundacao inicial (`T001` a `T012`): workspace, shell web, API com health check, ambiente PostgreSQL local, ferramentas de qualidade, Jest e utilitarios do contrato OpenAPI. Regras de negocio, Prisma e autenticacao entram nas proximas tarefas.
+Esta implementacao cobre `T001` a `T052`: workspace, API Express versionada, Prisma schema/migration/seed, JWT com refresh token, RBAC, clientes minimos, catalogo, criacao/listagem/status de orcamentos, calculo decimal, download de PDF e telas iniciais em React/Vite para login, cliente e orcamento.
 
 ## Requisitos
 
@@ -28,13 +28,37 @@ npm install
 npm run db:up
 ```
 
-4. Inicie API e frontend:
+4. Gere o Prisma Client, aplique a migracao e execute o seed:
+
+```bash
+npm run prisma:generate --workspace backend
+npm run prisma:migrate --workspace backend
+npm run prisma:seed --workspace backend
+```
+
+5. Inicie API e frontend:
 
 ```bash
 npm run dev
 ```
 
-O frontend sera servido em `http://localhost:5173`. A API usa `http://localhost:3333` e oferece `GET /health`.
+O frontend sera servido em `http://localhost:5173`. A API usa `http://localhost:3333` e oferece `GET /health` e `GET /api/v1/health`.
+
+Usuario inicial do seed:
+
+- E-mail: `admin@sistema.local`
+- Senha: `Admin@12345`
+
+## Roteiro Rapido para Testar
+
+1. Entrar em `http://localhost:5173/login`.
+2. Cadastrar um cliente em **Clientes**.
+3. Abrir **Novo orcamento**.
+4. Selecionar cliente, adicionar um servico/produto do catalogo seedado e salvar.
+5. Abrir o detalhe do orcamento, mudar status para `ENVIADO` e depois `APROVADO`.
+6. Baixar o PDF pelo botao **Baixar PDF**.
+
+Observacao: a criacao/aprovacao de orcamento nao movimenta estoque; baixa automatica fica para a fase de ordem de servico.
 
 ## Comandos
 
@@ -56,7 +80,9 @@ npm run db:down
 | Desenvolvimento  | `postgres`      | `5432` | `orcamento`      |
 | Integracao/Teste | `postgres-test` | `5433` | `orcamento_test` |
 
-O schema Prisma e as migracoes serao implementados a partir da tarefa `T013`.
+O schema Prisma esta em `backend/prisma/schema.prisma` e a primeira migracao em `backend/prisma/migrations/000001_initial_schema/migration.sql`.
+
+> Nota local: neste ambiente Windows, o download dos engines do Prisma retornou 404 pelo mirror `binaries.prisma.sh`; por isso os gates executados aqui evitaram depender de `prisma generate`. Em uma maquina com acesso normal ao mirror, rode os comandos Prisma acima antes de iniciar a API.
 
 ## Documentacao de Feature
 

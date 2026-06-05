@@ -1,0 +1,435 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  ADMIN
+  ATENDENTE
+  TECNICO
+  FINANCEIRO
+}
+
+enum PersonType {
+  PF
+  PJ
+}
+
+enum RecordStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum QuoteStatus {
+  RASCUNHO
+  ENVIADO
+  APROVADO
+  RECUSADO
+  EXPIRADO
+}
+
+enum ItemType {
+  SERVICE
+  PRODUCT
+}
+
+enum WorkOrderStatus {
+  ABERTA
+  EM_ANDAMENTO
+  AGUARDANDO_PECA
+  CONCLUIDA
+  CANCELADA
+}
+
+enum StockMovementType {
+  ENTRY
+  EXIT
+  ADJUSTMENT
+  WORK_ORDER
+}
+
+enum PaymentMethod {
+  DINHEIRO
+  PIX
+  CARTAO
+  BOLETO
+  TRANSFERENCIA
+}
+
+enum PaymentStatus {
+  PENDENTE
+  PARCIAL
+  PAGO
+  CANCELADO
+}
+
+enum AttachmentType {
+  COMPANY_LOGO
+  WORK_ORDER_PHOTO
+  WORK_ORDER_DOCUMENT
+  CLIENT_ACCEPTANCE
+}
+
+enum SequenceType {
+  QUOTE
+  WORK_ORDER
+}
+
+enum AuditAction {
+  CREATE
+  UPDATE
+  STATUS_CHANGE
+  LOGIN
+  ACCESS_DENIED
+  STOCK_CHANGE
+  PAYMENT_CHANGE
+  CONFIG_CHANGE
+}
+
+model User {
+  id             String         @id @default(uuid())
+  name           String
+  email          String         @unique
+  passwordHash   String
+  role           UserRole
+  status         RecordStatus   @default(ACTIVE)
+  lastLoginAt    DateTime?
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+  deletedAt      DateTime?
+  refreshTokens  RefreshToken[]
+  auditLogs      AuditLog[]
+  stockMovements StockMovement[] @relation("StockMovementAuthor")
+  quoteCreated   Quote[]        @relation("QuoteCreatedBy")
+  quoteUpdated   Quote[]        @relation("QuoteUpdatedBy")
+  workOrders     WorkOrder[]    @relation("WorkOrderTechnician")
+  workCreated    WorkOrder[]    @relation("WorkOrderCreatedBy")
+  workUpdated    WorkOrder[]    @relation("WorkOrderUpdatedBy")
+  paymentsMade   Payment[]      @relation("PaymentCreatedBy")
+  paymentsEdited Payment[]      @relation("PaymentUpdatedBy")
+  attachments    Attachment[]   @relation("AttachmentUploadedBy")
+
+  @@index([role, status])
+}
+
+model Client {
+  id         String       @id @default(uuid())
+  name       String
+  personType PersonType
+  document   String
+  phone      String?
+  whatsapp   String?
+  email      String?
+  street     String?
+  number     String?
+  complement String?
+  district   String?
+  city       String?
+  state      String?
+  zipCode    String?
+  notes      String?
+  status     RecordStatus @default(ACTIVE)
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+  deletedAt  DateTime?
+  quotes     Quote[]
+  workOrders WorkOrder[]
+
+  @@index([name])
+  @@index([status])
+  @@index([document])
+}
+
+model Product {
+  id             String          @id @default(uuid())
+  name           String
+  sku            String          @unique
+  category       String
+  supplier       String?
+  unit           String
+  stockQuantity  Decimal         @default(0) @db.Decimal(14, 3)
+  minimumStock   Decimal         @default(0) @db.Decimal(14, 3)
+  costPrice      Decimal         @default(0) @db.Decimal(14, 2)
+  salePrice      Decimal         @default(0) @db.Decimal(14, 2)
+  status         RecordStatus    @default(ACTIVE)
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  deletedAt      DateTime?
+  quoteItems     QuoteItem[]
+  workOrderItems WorkOrderItem[]
+  movements      StockMovement[]
+
+  @@index([status, category])
+}
+
+model Service {
+  id               String          @id @default(uuid())
+  name             String
+  description      String
+  category         String
+  defaultPrice     Decimal         @default(0) @db.Decimal(14, 2)
+  estimatedMinutes Int
+  status           RecordStatus    @default(ACTIVE)
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+  deletedAt        DateTime?
+  quoteItems       QuoteItem[]
+  workOrderItems   WorkOrderItem[]
+
+  @@index([status, category])
+  @@index([name])
+}
+
+model Quote {
+  id                 String        @id @default(uuid())
+  number             String        @unique
+  clientId           String
+  issuedAt           DateTime      @default(now())
+  validUntil         DateTime
+  requestDescription String
+  notes              String?
+  paymentTerms       String?
+  executionDeadline  String?
+  laborAmount        Decimal       @default(0) @db.Decimal(14, 2)
+  travelFee          Decimal       @default(0) @db.Decimal(14, 2)
+  generalDiscount    Decimal       @default(0) @db.Decimal(14, 2)
+  itemsSubtotal      Decimal       @default(0) @db.Decimal(14, 2)
+  totalDiscount      Decimal       @default(0) @db.Decimal(14, 2)
+  totalAmount        Decimal       @default(0) @db.Decimal(14, 2)
+  estimatedCost      Decimal       @default(0) @db.Decimal(14, 2)
+  estimatedProfit    Decimal       @default(0) @db.Decimal(14, 2)
+  status             QuoteStatus   @default(RASCUNHO)
+  clientSnapshot     Json?
+  companySnapshot    Json?
+  snapshotAt         DateTime?
+  createdById        String
+  updatedById        String
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+  client             Client        @relation(fields: [clientId], references: [id])
+  createdBy          User          @relation("QuoteCreatedBy", fields: [createdById], references: [id])
+  updatedBy          User          @relation("QuoteUpdatedBy", fields: [updatedById], references: [id])
+  items              QuoteItem[]
+  workOrder          WorkOrder?
+  payments           Payment[]
+
+  @@index([status, issuedAt])
+  @@index([clientId, createdAt])
+  @@index([validUntil, status])
+}
+
+model QuoteItem {
+  id                  String   @id @default(uuid())
+  quoteId             String
+  type                ItemType
+  productId           String?
+  serviceId           String?
+  descriptionSnapshot String
+  unitSnapshot        String?
+  quantity            Decimal  @db.Decimal(14, 3)
+  unitPrice           Decimal  @db.Decimal(14, 2)
+  unitCost            Decimal  @default(0) @db.Decimal(14, 2)
+  discountAmount      Decimal  @default(0) @db.Decimal(14, 2)
+  subtotal            Decimal  @db.Decimal(14, 2)
+  total               Decimal  @db.Decimal(14, 2)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+  quote               Quote    @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+  product             Product? @relation(fields: [productId], references: [id])
+  service             Service? @relation(fields: [serviceId], references: [id])
+
+  @@index([quoteId, type])
+}
+
+model WorkOrder {
+  id                   String            @id @default(uuid())
+  number               String            @unique
+  clientId             String
+  quoteId              String?           @unique
+  technicianId         String?
+  openedAt             DateTime          @default(now())
+  expectedAt           DateTime?
+  completedAt          DateTime?
+  problemDescription   String
+  executionDescription String?
+  internalNotes        String?
+  clientNotes          String?
+  laborCost            Decimal           @default(0) @db.Decimal(14, 2)
+  chargedAmount        Decimal           @default(0) @db.Decimal(14, 2)
+  totalCost            Decimal           @default(0) @db.Decimal(14, 2)
+  estimatedProfit      Decimal           @default(0) @db.Decimal(14, 2)
+  status               WorkOrderStatus   @default(ABERTA)
+  stockDeductedAt      DateTime?
+  createdById          String
+  updatedById          String
+  createdAt            DateTime          @default(now())
+  updatedAt            DateTime          @updatedAt
+  client               Client            @relation(fields: [clientId], references: [id])
+  quote                Quote?            @relation(fields: [quoteId], references: [id])
+  technician           User?             @relation("WorkOrderTechnician", fields: [technicianId], references: [id])
+  createdBy            User              @relation("WorkOrderCreatedBy", fields: [createdById], references: [id])
+  updatedBy            User              @relation("WorkOrderUpdatedBy", fields: [updatedById], references: [id])
+  items                WorkOrderItem[]
+  payments             Payment[]
+  attachments          Attachment[]
+
+  @@index([status, openedAt])
+  @@index([technicianId, status])
+  @@index([clientId, createdAt])
+}
+
+model WorkOrderItem {
+  id                  String          @id @default(uuid())
+  workOrderId         String
+  type                ItemType
+  productId           String?
+  serviceId           String?
+  descriptionSnapshot String
+  unitSnapshot        String?
+  plannedQuantity     Decimal         @db.Decimal(14, 3)
+  usedQuantity        Decimal         @default(0) @db.Decimal(14, 3)
+  unitPrice           Decimal         @default(0) @db.Decimal(14, 2)
+  unitCost            Decimal         @default(0) @db.Decimal(14, 2)
+  totalPrice          Decimal         @default(0) @db.Decimal(14, 2)
+  totalCost           Decimal         @default(0) @db.Decimal(14, 2)
+  createdAt           DateTime        @default(now())
+  updatedAt           DateTime        @updatedAt
+  workOrder           WorkOrder       @relation(fields: [workOrderId], references: [id], onDelete: Cascade)
+  product             Product?        @relation(fields: [productId], references: [id])
+  service             Service?        @relation(fields: [serviceId], references: [id])
+  stockMovement       StockMovement?
+
+  @@index([workOrderId, type])
+}
+
+model StockMovement {
+  id              String            @id @default(uuid())
+  productId       String
+  type            StockMovementType
+  quantity        Decimal           @db.Decimal(14, 3)
+  previousBalance Decimal           @db.Decimal(14, 3)
+  newBalance      Decimal           @db.Decimal(14, 3)
+  reason          String
+  workOrderItemId String?           @unique
+  createdById     String
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  product         Product           @relation(fields: [productId], references: [id])
+  workOrderItem   WorkOrderItem?    @relation(fields: [workOrderItemId], references: [id])
+  createdBy       User              @relation("StockMovementAuthor", fields: [createdById], references: [id])
+
+  @@index([productId, createdAt])
+}
+
+model Payment {
+  id            String        @id @default(uuid())
+  quoteId       String?
+  workOrderId   String?
+  method        PaymentMethod
+  status        PaymentStatus @default(PENDENTE)
+  amount        Decimal       @db.Decimal(14, 2)
+  paidAmount    Decimal       @default(0) @db.Decimal(14, 2)
+  dueDate       DateTime?
+  paidAt        DateTime?
+  notes         String?
+  createdById   String
+  updatedById   String
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  quote         Quote?        @relation(fields: [quoteId], references: [id])
+  workOrder     WorkOrder?    @relation(fields: [workOrderId], references: [id])
+  createdBy     User          @relation("PaymentCreatedBy", fields: [createdById], references: [id])
+  updatedBy     User          @relation("PaymentUpdatedBy", fields: [updatedById], references: [id])
+
+  @@index([status, dueDate])
+  @@index([workOrderId])
+  @@index([quoteId])
+}
+
+model CompanySettings {
+  id                 String      @id @default(uuid())
+  companyName        String
+  cnpj               String
+  phone              String?
+  whatsapp           String?
+  email              String?
+  address            String?
+  pixKey             String?
+  bankDetails        String?
+  defaultQuoteText   String?
+  defaultPdfFooter   String?
+  logoAttachmentId   String?     @unique
+  allowNegativeStock Boolean     @default(false)
+  timezone           String      @default("America/Sao_Paulo")
+  createdAt          DateTime    @default(now())
+  updatedAt          DateTime    @updatedAt
+  logoAttachment     Attachment? @relation("CompanyLogo", fields: [logoAttachmentId], references: [id])
+}
+
+model Attachment {
+  id              String           @id @default(uuid())
+  type            AttachmentType
+  workOrderId     String?
+  storageKey      String
+  originalName    String
+  mimeType        String
+  sizeBytes       Int
+  uploadedById    String
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  deletedAt       DateTime?
+  workOrder       WorkOrder?       @relation(fields: [workOrderId], references: [id])
+  uploadedBy      User             @relation("AttachmentUploadedBy", fields: [uploadedById], references: [id])
+  companySettings CompanySettings? @relation("CompanyLogo")
+
+  @@index([workOrderId, type])
+}
+
+model RefreshToken {
+  id          String    @id @default(uuid())
+  userId      String
+  familyId    String
+  tokenHash   String    @unique
+  expiresAt   DateTime
+  revokedAt   DateTime?
+  replacedAt  DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, expiresAt])
+  @@index([familyId])
+}
+
+model DocumentSequence {
+  id        String       @id @default(uuid())
+  type      SequenceType
+  year      Int
+  lastValue Int          @default(0)
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  @@unique([type, year])
+}
+
+model AuditLog {
+  id         String      @id @default(uuid())
+  actorId    String?
+  action     AuditAction
+  entityType String?
+  entityId   String?
+  metadata   Json?
+  ipAddress  String?
+  userAgent  String?
+  requestId  String?
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime    @updatedAt
+  actor      User?       @relation(fields: [actorId], references: [id])
+
+  @@index([entityType, entityId, createdAt])
+  @@index([actorId, createdAt])
+}
