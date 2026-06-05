@@ -13,6 +13,7 @@ backend/uploads/
 backend/storage/
 *.log
 npm-debug.log*
+.logs/
 
 # Editors and operating systems
 .vscode/
