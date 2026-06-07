@@ -2,14 +2,17 @@ import { Router } from "express";
 
 import { QuoteController } from "../controllers/quote.controller";
 import { QuotePdfController } from "../controllers/quote-pdf.controller";
+import { WorkOrderController } from "../controllers/work-order.controller";
 import { authenticate } from "../middlewares/authenticate.middleware";
 import { authorize } from "../middlewares/authorize.middleware";
 import { validateBody, validateQuery } from "../middlewares/validate.middleware";
 import { paginationSchema } from "../validators/common.schemas";
 import { quoteInputSchema, quoteStatusSchema } from "../validators/quote.schemas";
+import { workOrderConversionSchema } from "../validators/work-order.schemas";
 
 const controller = new QuoteController();
 const pdfController = new QuotePdfController();
+const workOrderController = new WorkOrderController();
 
 export const quoteRouter = Router();
 
@@ -37,3 +40,9 @@ quoteRouter.patch(
   (request, response) => controller.status(request, response),
 );
 quoteRouter.get("/:id/pdf", (request, response) => pdfController.download(request, response));
+quoteRouter.post(
+  "/:id/work-order",
+  authorize("ADMIN", "ATENDENTE"),
+  validateBody(workOrderConversionSchema),
+  (request, response) => workOrderController.convertFromQuote(request, response),
+);

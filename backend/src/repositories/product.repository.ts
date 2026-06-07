@@ -29,4 +29,8 @@ export class ProductRepository {
   create(data: object) {
     return this.db.product.create({ data });
   }
+
+  updateStock(id: string, stockQuantity: string) {
+    return this.db.product.update({ where: { id }, data: { stockQuantity } });
+  }
 }

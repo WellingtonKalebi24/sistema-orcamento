@@ -4,7 +4,7 @@ Aplicacao web para empresas de manutencao e assistencia tecnica, planejada com f
 
 ## Estado Atual
 
-Esta implementacao cobre `T001` a `T052`: workspace, API Express versionada, Prisma schema/migration/seed, JWT com refresh token, RBAC, clientes minimos, catalogo, criacao/listagem/status de orcamentos, calculo decimal, download de PDF e telas iniciais em React/Vite para login, cliente e orcamento.
+Esta implementacao cobre `T001` a `T067`: workspace, API Express versionada, Prisma schema/migration/seed, JWT com refresh token, RBAC, clientes minimos, catalogo, criacao/listagem/status de orcamentos, calculo decimal, download de PDF, ordens de servico manuais ou convertidas de orcamento aprovado, baixa automatica de estoque na conclusao da OS, anexos de OS e telas iniciais em React/Vite para login, cliente, orcamento e OS.
 
 ## Requisitos
 
@@ -57,8 +57,24 @@ Usuario inicial do seed:
 4. Selecionar cliente, adicionar um servico/produto do catalogo seedado e salvar.
 5. Abrir o detalhe do orcamento, mudar status para `ENVIADO` e depois `APROVADO`.
 6. Baixar o PDF pelo botao **Baixar PDF**.
+7. Com o orcamento aprovado, clicar em **Gerar ordem de servico**.
+8. Abrir **Ordens de servico**, acompanhar status, enviar anexos e concluir a OS.
+9. Ao concluir a OS, os produtos usados sao baixados do estoque e a movimentacao fica registrada.
 
-Observacao: a criacao/aprovacao de orcamento nao movimenta estoque; baixa automatica fica para a fase de ordem de servico.
+Observacao: a criacao/aprovacao de orcamento nao movimenta estoque; a baixa automatica acontece somente ao concluir a ordem de servico ou por movimentacao manual futura.
+
+## Rotas Implementadas da Fase 4
+
+- `GET /api/v1/work-orders`
+- `POST /api/v1/work-orders`
+- `GET /api/v1/work-orders/:id`
+- `PATCH /api/v1/work-orders/:id`
+- `POST /api/v1/quotes/:id/work-order`
+- `POST /api/v1/work-orders/:id/complete`
+- `GET /api/v1/work-orders/:id/attachments`
+- `POST /api/v1/work-orders/:id/attachments`
+- `GET /api/v1/work-orders/attachments/:id/download`
+- `GET /api/v1/attachments/:id/download`
 
 ## Comandos
 

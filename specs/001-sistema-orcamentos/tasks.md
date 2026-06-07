@@ -110,24 +110,24 @@
 
 ### Testes para User Story 2
 
-- [ ] T053 [P] [US2] Escrever testes unitarios para transicoes de OS, conversao unica e bloqueio apos conclusao em `backend/tests/unit/services/work-order.service.spec.ts`
-- [ ] T054 [P] [US2] Escrever testes de integracao para OS manual, conversao de orcamento, tecnico e anexos autorizados em `backend/tests/integration/work-orders.routes.spec.ts`
-- [ ] T055 [P] [US2] Escrever testes transacionais de conclusao, idempotencia, estoque insuficiente, saldo negativo configurado e concorrencia em `backend/tests/integration/work-order-completion.spec.ts`
+- [X] T053 [P] [US2] Escrever testes unitarios para transicoes de OS, conversao unica e bloqueio apos conclusao em `backend/tests/unit/services/work-order.service.spec.ts`
+- [X] T054 [P] [US2] Escrever testes de integracao para OS manual, conversao de orcamento, tecnico e anexos autorizados em `backend/tests/integration/work-orders.routes.spec.ts`
+- [X] T055 [P] [US2] Escrever testes transacionais de conclusao, idempotencia, estoque insuficiente, saldo negativo configurado e concorrencia em `backend/tests/integration/work-order-completion.spec.ts`
 
 ### Implementacao para User Story 2
 
-- [ ] T056 [US2] Implementar schemas de criacao, atualizacao, conclusao e anexos de OS em `backend/src/validators/work-order.schemas.ts` e `backend/src/validators/attachment.schemas.ts`
-- [ ] T057 [US2] Implementar repositories de OS, itens, anexos e leitura de saldo para conclusao em `backend/src/repositories/work-order.repository.ts`, `backend/src/repositories/attachment.repository.ts` e `backend/src/repositories/stock-movement.repository.ts`
-- [ ] T058 [US2] Implementar criacao manual, conversao unica e transicoes operacionais auditadas em `backend/src/services/work-order.service.ts`
-- [ ] T059 [US2] Implementar conclusao serializavel com baixa unica por item, bloqueio de saldo e configuracao de negativo em `backend/src/services/work-order-completion.service.ts` e `backend/src/services/stock.service.ts`
-- [ ] T060 [P] [US2] Implementar upload/download protegido de foto, documento e aceite em `backend/src/services/attachment.service.ts`, `backend/src/controllers/attachment.controller.ts` e `backend/src/routes/attachment.routes.ts`
-- [ ] T061 [US2] Expor listagem, detalhe, criacao, conversao e conclusao de OS com permissoes contextuais do tecnico em `backend/src/controllers/work-order.controller.ts`, `backend/src/routes/work-order.routes.ts` e `backend/src/routes/index.ts`
-- [ ] T062 [P] [US2] Implementar API e schemas frontend de OS/anexos em `frontend/src/features/work-orders/api/work-orders.api.ts` e `frontend/src/features/work-orders/validation/work-order.schema.ts`
-- [ ] T063 [P] [US2] Implementar listagem e detalhe operacional da OS com timeline/status em `frontend/src/features/work-orders/pages/WorkOrdersPage.tsx`, `frontend/src/features/work-orders/pages/WorkOrderDetailPage.tsx` e `frontend/src/features/work-orders/components/WorkOrderStatusPanel.tsx`
-- [ ] T064 [US2] Implementar formulario de OS manual e acao de conversao a partir do orcamento aprovado em `frontend/src/features/work-orders/pages/NewWorkOrderPage.tsx` e `frontend/src/features/quotes/components/CreateWorkOrderAction.tsx`
-- [ ] T065 [US2] Implementar edicao tecnica de consumo real, anexos e conclusao com exibicao de erro de estoque em `frontend/src/features/work-orders/components/ExecutionForm.tsx` e `frontend/src/features/work-orders/components/AttachmentPanel.tsx`
-- [ ] T066 [US2] Registrar rotas e navegacao de ordens para atendente/tecnico/admin em `frontend/src/app/router.tsx` e `frontend/src/components/layout/AppSidebar.tsx`
-- [ ] T067 [US2] Executar suite de OS/estoque e documentar demonstracao de conclusao segura em `backend/tests/integration/work-order-completion.spec.ts` e `README.md`
+- [X] T056 [US2] Implementar schemas de criacao, atualizacao, conclusao e anexos de OS em `backend/src/validators/work-order.schemas.ts` e `backend/src/validators/attachment.schemas.ts`
+- [X] T057 [US2] Implementar repositories de OS, itens, anexos e leitura de saldo para conclusao em `backend/src/repositories/work-order.repository.ts`, `backend/src/repositories/attachment.repository.ts` e `backend/src/repositories/stock-movement.repository.ts`
+- [X] T058 [US2] Implementar criacao manual, conversao unica e transicoes operacionais auditadas em `backend/src/services/work-order.service.ts`
+- [X] T059 [US2] Implementar conclusao serializavel com baixa unica por item, bloqueio de saldo e configuracao de negativo em `backend/src/services/work-order-completion.service.ts` e `backend/src/services/stock.service.ts`
+- [X] T060 [P] [US2] Implementar upload/download protegido de foto, documento e aceite em `backend/src/services/attachment.service.ts`, `backend/src/controllers/attachment.controller.ts` e `backend/src/routes/attachment.routes.ts`
+- [X] T061 [US2] Expor listagem, detalhe, criacao, conversao e conclusao de OS com permissoes contextuais do tecnico em `backend/src/controllers/work-order.controller.ts`, `backend/src/routes/work-order.routes.ts` e `backend/src/routes/index.ts`
+- [X] T062 [P] [US2] Implementar API e schemas frontend de OS/anexos em `frontend/src/features/work-orders/api/work-orders.api.ts` e `frontend/src/features/work-orders/validation/work-order.schema.ts`
+- [X] T063 [P] [US2] Implementar listagem e detalhe operacional da OS com timeline/status em `frontend/src/features/work-orders/pages/WorkOrdersPage.tsx`, `frontend/src/features/work-orders/pages/WorkOrderDetailPage.tsx` e `frontend/src/features/work-orders/components/WorkOrderStatusPanel.tsx`
+- [X] T064 [US2] Implementar formulario de OS manual e acao de conversao a partir do orcamento aprovado em `frontend/src/features/work-orders/pages/NewWorkOrderPage.tsx` e `frontend/src/features/quotes/components/CreateWorkOrderAction.tsx`
+- [X] T065 [US2] Implementar edicao tecnica de consumo real, anexos e conclusao com exibicao de erro de estoque em `frontend/src/features/work-orders/components/ExecutionForm.tsx` e `frontend/src/features/work-orders/components/AttachmentPanel.tsx`
+- [X] T066 [US2] Registrar rotas e navegacao de ordens para atendente/tecnico/admin em `frontend/src/app/router.tsx` e `frontend/src/components/layout/AppSidebar.tsx`
+- [X] T067 [US2] Executar suite de OS/estoque e documentar demonstracao de conclusao segura em `backend/tests/integration/work-order-completion.spec.ts` e `README.md`
 
 **Checkpoint**: O ciclo aprovado -> execucao -> conclusao esta operacional, com estoque consistente sob repeticao e concorrencia.
 

@@ -110,6 +110,10 @@ function createMemoryPrisma() {
   ];
   const quotes: any[] = [];
   const quoteItems: any[] = [];
+  const workOrders: any[] = [];
+  const workOrderItems: any[] = [];
+  const stockMovements: any[] = [];
+  const attachments: any[] = [];
   const auditLogs: any[] = [];
   const sequences = new Map<string, any>();
   const company = {
@@ -137,8 +141,22 @@ function createMemoryPrisma() {
     items: quoteItems.filter((item) => item.quoteId === quote.id),
   });
 
+  const attachWorkOrderRelations = (workOrder: any) => ({
+    ...workOrder,
+    client: clients.find((client) => client.id === workOrder.clientId),
+    technician: users.find((user) => user.id === workOrder.technicianId) ?? null,
+    quote: workOrder.quoteId ? quotes.find((quote) => quote.id === workOrder.quoteId) : null,
+    items: workOrderItems.filter((item) => item.workOrderId === workOrder.id),
+    attachments: attachments.filter(
+      (attachment) => attachment.workOrderId === workOrder.id && attachment.deletedAt === null,
+    ),
+  });
+
   return {
-    $transaction: async (operations: unknown[]) => Promise.all(operations as Promise<unknown>[]),
+    $transaction: async (operations: unknown[] | ((client: unknown) => unknown)) =>
+      typeof operations === "function"
+        ? operations(createMemoryPrisma())
+        : Promise.all(operations as Promise<unknown>[]),
     user: {
       findFirst: async ({ where }: any) =>
         users.find(
@@ -270,6 +288,11 @@ function createMemoryPrisma() {
         products.push(next);
         return next;
       },
+      update: async ({ where, data }: any) => {
+        const record = products.find((product) => product.id === where.id);
+        Object.assign(record, data, { updatedAt: now() });
+        return record;
+      },
       deleteMany: async () => ({ count: 0 }),
     },
     service: {
@@ -393,6 +416,141 @@ function createMemoryPrisma() {
         return { count: before - quoteItems.length };
       },
     },
-    stockMovement: { deleteMany: async () => ({ count: 0 }) },
+    workOrder: {
+      findMany: async ({ where, skip = 0, take = 20 }: any = {}) => {
+        const search =
+          where?.OR?.[0]?.number?.contains ??
+          where?.OR?.[1]?.client?.name?.contains ??
+          where?.OR?.[2]?.problemDescription?.contains;
+        return workOrders
+          .filter(
+            (workOrder) =>
+              (!where?.status || workOrder.status === where.status) &&
+              (matchesSearch(workOrder.number, search) ||
+                matchesSearch(workOrder.problemDescription, search) ||
+                matchesSearch(
+                  clients.find((client) => client.id === workOrder.clientId)?.name,
+                  search,
+                )),
+          )
+          .slice(skip, skip + take)
+          .map(attachWorkOrderRelations);
+      },
+      count: async ({ where }: any = {}) =>
+        workOrders.filter((workOrder) => !where?.status || workOrder.status === where.status)
+          .length,
+      findUnique: async ({ where }: any) => {
+        const workOrder = workOrders.find((record) => record.id === where.id);
+        return workOrder ? attachWorkOrderRelations(workOrder) : null;
+      },
+      findFirst: async ({ where }: any) =>
+        workOrders.find(
+          (record) =>
+            (!where.id || record.id === where.id) &&
+            (!where.quoteId || record.quoteId === where.quoteId) &&
+            (!where.status || record.status === where.status),
+        ) ?? null,
+      create: async ({ data }: any) => {
+        const { items, ...workOrderData } = data;
+        const workOrder = {
+          id: id(),
+          openedAt: now(),
+          completedAt: null,
+          status: "ABERTA",
+          stockDeductedAt: null,
+          createdAt: now(),
+          updatedAt: now(),
+          ...workOrderData,
+        };
+        workOrders.push(workOrder);
+        for (const item of items?.create ?? []) {
+          workOrderItems.push({
+            id: id(),
+            workOrderId: workOrder.id,
+            createdAt: now(),
+            updatedAt: now(),
+            ...item,
+          });
+        }
+        return attachWorkOrderRelations(workOrder);
+      },
+      update: async ({ where, data }: any) => {
+        const workOrder = workOrders.find((record) => record.id === where.id);
+        if (data.items?.create) {
+          data.items.create.forEach((item: any) =>
+            workOrderItems.push({
+              id: id(),
+              workOrderId: workOrder.id,
+              createdAt: now(),
+              updatedAt: now(),
+              ...item,
+            }),
+          );
+        }
+        delete data.items;
+        Object.assign(workOrder, data, { updatedAt: now() });
+        return attachWorkOrderRelations(workOrder);
+      },
+      deleteMany: async () => ({ count: 0 }),
+    },
+    workOrderItem: {
+      deleteMany: async ({ where }: any) => {
+        const before = workOrderItems.length;
+        for (let index = workOrderItems.length - 1; index >= 0; index -= 1) {
+          if (workOrderItems[index].workOrderId === where.workOrderId)
+            workOrderItems.splice(index, 1);
+        }
+        return { count: before - workOrderItems.length };
+      },
+    },
+    stockMovement: {
+      findFirst: async ({ where }: any) =>
+        stockMovements.find(
+          (movement) =>
+            (!where.workOrderItemId || movement.workOrderItemId === where.workOrderItemId) &&
+            (!where.productId || movement.productId === where.productId),
+        ) ?? null,
+      findMany: async ({ where }: any = {}) =>
+        stockMovements.filter(
+          (movement) => !where?.productId || movement.productId === where.productId,
+        ),
+      create: async ({ data }: any) => {
+        const record = { id: id(), createdAt: now(), updatedAt: now(), ...data };
+        stockMovements.push(record);
+        return record;
+      },
+      deleteMany: async () => ({ count: 0 }),
+    },
+    attachment: {
+      findMany: async ({ where }: any = {}) =>
+        attachments.filter(
+          (attachment) =>
+            (!where?.workOrderId || attachment.workOrderId === where.workOrderId) &&
+            (where?.deletedAt === undefined || attachment.deletedAt === where.deletedAt),
+        ),
+      findFirst: async ({ where }: any) =>
+        attachments.find(
+          (attachment) =>
+            (!where.id || attachment.id === where.id) &&
+            (where.deletedAt === undefined || attachment.deletedAt === where.deletedAt),
+        ) ?? null,
+      create: async ({ data }: any) => {
+        const record = {
+          id: id(),
+          createdAt: now(),
+          updatedAt: now(),
+          deletedAt: null,
+          ...data,
+        };
+        attachments.push(record);
+        return record;
+      },
+      update: async ({ where, data }: any) => {
+        const record = attachments.find((attachment) => attachment.id === where.id);
+        Object.assign(record, data, { updatedAt: now() });
+        return record;
+      },
+      deleteMany: async () => ({ count: 0 }),
+    },
   };
 }

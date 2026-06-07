@@ -4,6 +4,7 @@ import { useParams } from "react-router-dom";
 import type { Quote } from "../../../lib/api/schema";
 import { formatCurrency } from "../../../lib/formatters/currency";
 import { getQuote, quotePdfUrl } from "../api/quotes.api";
+import { CreateWorkOrderAction } from "../components/CreateWorkOrderAction";
 import { QuoteStatusActions } from "../components/QuoteStatusActions";
 
 export function QuoteDetailPage() {
@@ -34,6 +35,7 @@ export function QuoteDetailPage() {
       </div>
       <h3>Total: {formatCurrency(quote.totalAmount)}</h3>
       <QuoteStatusActions quote={quote} onChange={setQuote} />
+      <CreateWorkOrderAction quote={quote} />
       <a
         className="button-primary inline-link"
         href={quotePdfUrl(quote.id)}

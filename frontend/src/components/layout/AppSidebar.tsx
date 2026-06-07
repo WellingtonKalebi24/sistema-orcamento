@@ -5,6 +5,8 @@ const items = [
   { label: "Clientes", to: "/clientes/novo" },
   { label: "Orcamentos", to: "/orcamentos" },
   { label: "Novo orcamento", to: "/orcamentos/novo" },
+  { label: "Ordens de servico", to: "/ordens" },
+  { label: "Nova OS", to: "/ordens/nova" },
 ];
 
 export function AppSidebar() {

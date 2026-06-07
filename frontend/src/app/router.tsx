@@ -8,6 +8,9 @@ import { DashboardPage } from "../features/dashboard/pages/DashboardPage";
 import { NewQuotePage } from "../features/quotes/pages/NewQuotePage";
 import { QuoteDetailPage } from "../features/quotes/pages/QuoteDetailPage";
 import { QuotesPage } from "../features/quotes/pages/QuotesPage";
+import { NewWorkOrderPage } from "../features/work-orders/pages/NewWorkOrderPage";
+import { WorkOrderDetailPage } from "../features/work-orders/pages/WorkOrderDetailPage";
+import { WorkOrdersPage } from "../features/work-orders/pages/WorkOrdersPage";
 
 export function AppRoutes() {
   return (
@@ -26,6 +29,9 @@ export function AppRoutes() {
           <Route path="/orcamentos" element={<QuotesPage />} />
           <Route path="/orcamentos/novo" element={<NewQuotePage />} />
           <Route path="/orcamentos/:id" element={<QuoteDetailPage />} />
+          <Route path="/ordens" element={<WorkOrdersPage />} />
+          <Route path="/ordens/nova" element={<NewWorkOrderPage />} />
+          <Route path="/ordens/:id" element={<WorkOrderDetailPage />} />
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
