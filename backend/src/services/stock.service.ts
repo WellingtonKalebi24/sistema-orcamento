@@ -2,6 +2,7 @@ import { CompanySettingsService } from "./company-settings.service";
 import { ProductRepository } from "../repositories/product.repository";
 import { StockMovementRepository } from "../repositories/stock-movement.repository";
 import { AppError } from "../utils/app-error";
+import type { StockMovementInput } from "../validators/stock.schemas";
 
 type StockWorkOrderItem = {
   id: string;
@@ -70,5 +71,41 @@ export class StockService {
       });
       await this.products.updateStock(item.productId, quantity(newBalance));
     }
+  }
+
+  async list(filters: { page: number; pageSize: number; productId?: string }) {
+    const [data, total] = await this.movements.list(filters);
+    return { data, meta: { ...filters, total } };
+  }
+
+  async createManualMovement(productId: string, input: StockMovementInput, userId: string) {
+    const product = await this.products.findById(productId);
+    if (!product) throw AppError.notFound("Produto nao encontrado.");
+
+    const previousBalance = toNumber(product.stockQuantity);
+    const movementQuantity = toNumber(input.quantity);
+    const newBalance =
+      input.type === "ENTRY"
+        ? previousBalance + movementQuantity
+        : input.type === "EXIT"
+          ? previousBalance - movementQuantity
+          : movementQuantity;
+
+    const settings = await this.company.getDefault();
+    if (newBalance < 0 && !settings.allowNegativeStock) {
+      throw new AppError("INSUFFICIENT_STOCK", "Estoque insuficiente para movimentacao.", 409);
+    }
+
+    const movement = await this.movements.create({
+      productId,
+      type: input.type,
+      quantity: input.quantity,
+      previousBalance: quantity(previousBalance),
+      newBalance: quantity(newBalance),
+      reason: input.reason,
+      createdById: userId,
+    });
+    await this.products.updateStock(productId, quantity(newBalance));
+    return movement;
   }
 }

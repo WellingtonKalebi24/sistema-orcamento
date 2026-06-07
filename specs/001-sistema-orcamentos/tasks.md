@@ -141,21 +141,21 @@
 
 ### Testes para User Story 3
 
-- [ ] T068 [P] [US3] Escrever testes de integracao de CRUD, busca, inativacao e historico de clientes/servicos/produtos em `backend/tests/integration/catalogs.routes.spec.ts`
-- [ ] T069 [P] [US3] Escrever testes unitarios e de integracao para entrada, saida, ajuste, saldo insuficiente e alerta minimo em `backend/tests/unit/services/stock.service.spec.ts` e `backend/tests/integration/stock.routes.spec.ts`
+- [X] T068 [P] [US3] Escrever testes de integracao de CRUD, busca, inativacao e historico de clientes/servicos/produtos em `backend/tests/integration/catalogs.routes.spec.ts`
+- [X] T069 [P] [US3] Escrever testes unitarios e de integracao para entrada, saida, ajuste, saldo insuficiente e alerta minimo em `backend/tests/unit/services/stock.service.spec.ts` e `backend/tests/integration/stock.routes.spec.ts`
 
 ### Implementacao para User Story 3
 
-- [ ] T070 [P] [US3] Completar validadores e services de edicao/inativacao/historico de clientes em `backend/src/validators/client.schemas.ts` e `backend/src/services/client.service.ts`
-- [ ] T071 [P] [US3] Completar CRUD e inativacao do catalogo de servicos em `backend/src/validators/service.schemas.ts`, `backend/src/services/service.service.ts`, `backend/src/controllers/service.controller.ts` e `backend/src/routes/service.routes.ts`
-- [ ] T072 [P] [US3] Completar CRUD, filtros e consulta de estoque baixo de produtos em `backend/src/validators/product.schemas.ts`, `backend/src/services/product.service.ts`, `backend/src/controllers/product.controller.ts` e `backend/src/routes/product.routes.ts`
-- [ ] T073 [US3] Implementar movimentos manuais auditados e historico paginado de estoque em `backend/src/validators/stock.schemas.ts`, `backend/src/services/stock.service.ts`, `backend/src/controllers/stock.controller.ts` e `backend/src/routes/stock.routes.ts`
-- [ ] T074 [US3] Implementar historico consolidado do cliente com orcamentos e ordens permitidas em `backend/src/services/client-history.service.ts` e `backend/src/controllers/client.controller.ts`
-- [ ] T075 [P] [US3] Implementar telas completas de clientes com busca, formulario, inativacao e historico em `frontend/src/features/clients/pages/ClientsPage.tsx`, `frontend/src/features/clients/pages/ClientDetailPage.tsx` e `frontend/src/features/clients/components/ClientForm.tsx`
-- [ ] T076 [P] [US3] Implementar telas de servicos com filtros, edicao e inativacao em `frontend/src/features/services/pages/ServicesPage.tsx` e `frontend/src/features/services/components/ServiceForm.tsx`
-- [ ] T077 [P] [US3] Implementar produtos/estoque com alerta, movimentos e historico em `frontend/src/features/products/pages/ProductsPage.tsx`, `frontend/src/features/products/pages/StockMovementsPage.tsx` e `frontend/src/features/products/components/StockMovementForm.tsx`
-- [ ] T078 [US3] Registrar navegacao e permissoes de cadastros/estoque no frontend em `frontend/src/app/router.tsx`, `frontend/src/app/permissions.ts` e `frontend/src/components/layout/AppSidebar.tsx`
-- [ ] T079 [US3] Executar testes de cadastros/estoque e validar filtros/alerta minimo no roteiro local em `backend/tests/integration/stock.routes.spec.ts` e `README.md`
+- [X] T070 [P] [US3] Completar validadores e services de edicao/inativacao/historico de clientes em `backend/src/validators/client.schemas.ts` e `backend/src/services/client.service.ts`
+- [X] T071 [P] [US3] Completar CRUD e inativacao do catalogo de servicos em `backend/src/validators/service.schemas.ts`, `backend/src/services/service.service.ts`, `backend/src/controllers/service.controller.ts` e `backend/src/routes/service.routes.ts`
+- [X] T072 [P] [US3] Completar CRUD, filtros e consulta de estoque baixo de produtos em `backend/src/validators/product.schemas.ts`, `backend/src/services/product.service.ts`, `backend/src/controllers/product.controller.ts` e `backend/src/routes/product.routes.ts`
+- [X] T073 [US3] Implementar movimentos manuais auditados e historico paginado de estoque em `backend/src/validators/stock.schemas.ts`, `backend/src/services/stock.service.ts`, `backend/src/controllers/stock.controller.ts` e `backend/src/routes/stock.routes.ts`
+- [X] T074 [US3] Implementar historico consolidado do cliente com orcamentos e ordens permitidas em `backend/src/services/client-history.service.ts` e `backend/src/controllers/client.controller.ts`
+- [X] T075 [P] [US3] Implementar telas completas de clientes com busca, formulario, inativacao e historico em `frontend/src/features/clients/pages/ClientsPage.tsx`, `frontend/src/features/clients/pages/ClientDetailPage.tsx` e `frontend/src/features/clients/components/ClientForm.tsx`
+- [X] T076 [P] [US3] Implementar telas de servicos com filtros, edicao e inativacao em `frontend/src/features/services/pages/ServicesPage.tsx` e `frontend/src/features/services/components/ServiceForm.tsx`
+- [X] T077 [P] [US3] Implementar produtos/estoque com alerta, movimentos e historico em `frontend/src/features/products/pages/ProductsPage.tsx`, `frontend/src/features/products/pages/StockMovementsPage.tsx` e `frontend/src/features/products/components/StockMovementForm.tsx`
+- [X] T078 [US3] Registrar navegacao e permissoes de cadastros/estoque no frontend em `frontend/src/app/router.tsx`, `frontend/src/app/permissions.ts` e `frontend/src/components/layout/AppSidebar.tsx`
+- [X] T079 [US3] Executar testes de cadastros/estoque e validar filtros/alerta minimo no roteiro local em `backend/tests/integration/stock.routes.spec.ts` e `README.md`
 
 **Checkpoint**: Cadastros e estoque podem ser mantidos diariamente, preservando historicos usados por orcamentos e OS.
 
@@ -169,22 +169,22 @@
 
 ### Testes para User Story 4
 
-- [ ] T080 [P] [US4] Escrever testes unitarios de situacao de pagamento, receita recebida e lucro estimado em `backend/tests/unit/services/payment.service.spec.ts` e `backend/tests/unit/services/dashboard.service.spec.ts`
-- [ ] T081 [P] [US4] Escrever testes de integracao de pagamentos, relatorios, dashboard e protecao financeira em `backend/tests/integration/payments-dashboard.routes.spec.ts`
+- [X] T080 [P] [US4] Escrever testes unitarios de situacao de pagamento, receita recebida e lucro estimado em `backend/tests/unit/services/payment.service.spec.ts` e `backend/tests/unit/services/dashboard.service.spec.ts`
+- [X] T081 [P] [US4] Escrever testes de integracao de pagamentos, relatorios, dashboard e protecao financeira em `backend/tests/integration/payments-dashboard.routes.spec.ts`
 
 ### Implementacao para User Story 4
 
-- [ ] T082 [US4] Implementar schemas e repository de pagamentos vinculados exatamente a orcamento ou OS em `backend/src/validators/payment.schemas.ts` e `backend/src/repositories/payment.repository.ts`
-- [ ] T083 [US4] Implementar regras de pagamento parcial/pago/cancelado e auditoria financeira em `backend/src/services/payment.service.ts`
-- [ ] T084 [US4] Expor endpoints financeiros com RBAC de admin/financeiro em `backend/src/controllers/payment.controller.ts`, `backend/src/routes/payment.routes.ts` e `backend/src/routes/index.ts`
-- [ ] T085 [US4] Implementar agregacoes filtradas de cards, graficos, recentes e produtos mais usados em `backend/src/repositories/dashboard.repository.ts` e `backend/src/services/dashboard.service.ts`
-- [ ] T086 [US4] Implementar relatorios simples de orcamentos, OS, pagamentos, rentabilidade e estoque em `backend/src/services/report.service.ts`, `backend/src/controllers/report.controller.ts` e `backend/src/routes/report.routes.ts`
-- [ ] T087 [US4] Expor dashboard com redacao de valores conforme papel em `backend/src/controllers/dashboard.controller.ts` e `backend/src/routes/dashboard.routes.ts`
-- [ ] T088 [P] [US4] Implementar API, listagem e formulario de pagamentos em `frontend/src/features/payments/api/payments.api.ts`, `frontend/src/features/payments/pages/PaymentsPage.tsx` e `frontend/src/features/payments/components/PaymentForm.tsx`
-- [ ] T089 [P] [US4] Implementar cards e graficos do dashboard em `frontend/src/features/dashboard/api/dashboard.api.ts`, `frontend/src/features/dashboard/pages/DashboardPage.tsx` e `frontend/src/features/dashboard/components/DashboardCharts.tsx`
-- [ ] T090 [P] [US4] Implementar pagina de relatorios com periodo e exportacao visual basica em `frontend/src/features/reports/pages/ReportsPage.tsx` e `frontend/src/features/reports/api/reports.api.ts`
-- [ ] T091 [US4] Registrar rotas/menu financeiro com visibilidade por papel em `frontend/src/app/router.tsx`, `frontend/src/app/permissions.ts` e `frontend/src/components/layout/AppSidebar.tsx`
-- [ ] T092 [US4] Executar testes financeiros/dashboard e validar indicadores do roteiro de demonstracao em `backend/tests/integration/payments-dashboard.routes.spec.ts` e `README.md`
+- [X] T082 [US4] Implementar schemas e repository de pagamentos vinculados exatamente a orcamento ou OS em `backend/src/validators/payment.schemas.ts` e `backend/src/repositories/payment.repository.ts`
+- [X] T083 [US4] Implementar regras de pagamento parcial/pago/cancelado e auditoria financeira em `backend/src/services/payment.service.ts`
+- [X] T084 [US4] Expor endpoints financeiros com RBAC de admin/financeiro em `backend/src/controllers/payment.controller.ts`, `backend/src/routes/payment.routes.ts` e `backend/src/routes/index.ts`
+- [X] T085 [US4] Implementar agregacoes filtradas de cards, graficos, recentes e produtos mais usados em `backend/src/repositories/dashboard.repository.ts` e `backend/src/services/dashboard.service.ts`
+- [X] T086 [US4] Implementar relatorios simples de orcamentos, OS, pagamentos, rentabilidade e estoque em `backend/src/services/report.service.ts`, `backend/src/controllers/report.controller.ts` e `backend/src/routes/report.routes.ts`
+- [X] T087 [US4] Expor dashboard com redacao de valores conforme papel em `backend/src/controllers/dashboard.controller.ts` e `backend/src/routes/dashboard.routes.ts`
+- [X] T088 [P] [US4] Implementar API, listagem e formulario de pagamentos em `frontend/src/features/payments/api/payments.api.ts`, `frontend/src/features/payments/pages/PaymentsPage.tsx` e `frontend/src/features/payments/components/PaymentForm.tsx`
+- [X] T089 [P] [US4] Implementar cards e graficos do dashboard em `frontend/src/features/dashboard/api/dashboard.api.ts`, `frontend/src/features/dashboard/pages/DashboardPage.tsx` e `frontend/src/features/dashboard/components/DashboardCharts.tsx`
+- [X] T090 [P] [US4] Implementar pagina de relatorios com periodo e exportacao visual basica em `frontend/src/features/reports/pages/ReportsPage.tsx` e `frontend/src/features/reports/api/reports.api.ts`
+- [X] T091 [US4] Registrar rotas/menu financeiro com visibilidade por papel em `frontend/src/app/router.tsx`, `frontend/src/app/permissions.ts` e `frontend/src/components/layout/AppSidebar.tsx`
+- [X] T092 [US4] Executar testes financeiros/dashboard e validar indicadores do roteiro de demonstracao em `backend/tests/integration/payments-dashboard.routes.spec.ts` e `README.md`
 
 **Checkpoint**: Gestao acompanha dinheiro e operacao do periodo sem expor informacao financeira a perfis nao autorizados.
 

@@ -28,11 +28,32 @@ export class ClientRepository {
     return this.db.client.findFirst({ where: { id, deletedAt: null } });
   }
 
+  findHistoryById(id: string) {
+    return this.db.client.findFirst({
+      where: { id, deletedAt: null },
+      include: {
+        quotes: { include: { items: true }, orderBy: { createdAt: "desc" }, take: 20 },
+        workOrders: { include: { items: true }, orderBy: { createdAt: "desc" }, take: 20 },
+      },
+    });
+  }
+
   findByDocument(document: string) {
     return this.db.client.findFirst({ where: { document, deletedAt: null } });
   }
 
   create(data: object) {
     return this.db.client.create({ data });
+  }
+
+  update(id: string, data: object) {
+    return this.db.client.update({ where: { id }, data });
+  }
+
+  softDelete(id: string) {
+    return this.db.client.update({
+      where: { id },
+      data: { deletedAt: new Date(), status: "INACTIVE" },
+    });
   }
 }

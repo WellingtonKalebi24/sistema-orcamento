@@ -35,15 +35,24 @@ export type CatalogProduct = {
   id: string;
   name: string;
   sku: string;
+  category?: string;
+  supplier?: string;
   unit: string;
+  stockQuantity?: string;
+  minimumStock?: string;
   salePrice: string;
   costPrice: string;
+  lowStock?: boolean;
 };
 
 export type CatalogService = {
   id: string;
   name: string;
+  description?: string;
+  category?: string;
   defaultPrice: string;
+  estimatedMinutes?: number;
+  status?: "ACTIVE" | "INACTIVE";
 };
 
 export type Quote = {
@@ -86,6 +95,52 @@ export type Attachment = {
   mimeType: string;
   sizeBytes: number;
   createdAt: string;
+};
+
+export type StockMovement = {
+  id: string;
+  productId: string;
+  type: "ENTRY" | "EXIT" | "ADJUSTMENT" | "WORK_ORDER";
+  quantity: string;
+  previousBalance: string;
+  newBalance: string;
+  reason: string;
+  createdAt: string;
+  product?: CatalogProduct;
+};
+
+export type Payment = {
+  id: string;
+  quoteId?: string;
+  workOrderId?: string;
+  method: "DINHEIRO" | "PIX" | "CARTAO" | "BOLETO" | "TRANSFERENCIA";
+  status: "PENDENTE" | "PARCIAL" | "PAGO" | "CANCELADO";
+  amount: string;
+  paidAmount: string;
+  dueDate?: string;
+  paidAt?: string;
+  notes?: string;
+  quote?: Quote;
+  workOrder?: WorkOrder;
+};
+
+export type DashboardSummary = {
+  cards: {
+    quotesMonth: number;
+    quotesApproved: number;
+    quotesRejected: number;
+    monthlyRevenue: string | null;
+    estimatedProfit: string | null;
+    openWorkOrders: number;
+    inProgressServices: number;
+    lowStock: number;
+    clients: number;
+  };
+  revenueSeries: Array<{ month: string; revenue: number }>;
+  quoteStatus: Array<{ status: QuoteStatus; total: number }>;
+  topProducts: CatalogProduct[];
+  latestQuotes: Quote[];
+  latestWorkOrders: WorkOrder[];
 };
 
 export type WorkOrder = {

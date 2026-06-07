@@ -113,6 +113,7 @@ function createMemoryPrisma() {
   const workOrders: any[] = [];
   const workOrderItems: any[] = [];
   const stockMovements: any[] = [];
+  const payments: any[] = [];
   const attachments: any[] = [];
   const auditLogs: any[] = [];
   const sequences = new Map<string, any>();
@@ -150,6 +151,22 @@ function createMemoryPrisma() {
     attachments: attachments.filter(
       (attachment) => attachment.workOrderId === workOrder.id && attachment.deletedAt === null,
     ),
+  });
+
+  const attachClientRelations = (client: any) => ({
+    ...client,
+    quotes: quotes.filter((quote) => quote.clientId === client.id).map(attachQuoteRelations),
+    workOrders: workOrders
+      .filter((workOrder) => workOrder.clientId === client.id)
+      .map(attachWorkOrderRelations),
+  });
+
+  const attachPaymentRelations = (payment: any) => ({
+    ...payment,
+    quote: payment.quoteId ? quotes.find((quote) => quote.id === payment.quoteId) : null,
+    workOrder: payment.workOrderId
+      ? workOrders.find((workOrder) => workOrder.id === payment.workOrderId)
+      : null,
   });
 
   return {
@@ -230,6 +247,7 @@ function createMemoryPrisma() {
           .filter(
             (client) =>
               client.deletedAt === null &&
+              (!where?.status || client.status === where.status) &&
               (matchesSearch(client.name, search) || matchesSearch(client.document, search)),
           )
           .slice(skip, skip + take);
@@ -242,32 +260,52 @@ function createMemoryPrisma() {
             (matchesSearch(client.name, search) || matchesSearch(client.document, search)),
         ).length;
       },
-      findFirst: async ({ where }: any) =>
-        clients.find(
+      findFirst: async ({ where }: any) => {
+        const record = clients.find(
           (client) =>
             (!where.id || client.id === where.id) &&
             (!where.document || client.document === where.document) &&
             (where.deletedAt === undefined || client.deletedAt === where.deletedAt),
-        ) ?? null,
+        );
+        if (!record) return null;
+        return where.include ? attachClientRelations(record) : record;
+      },
       create: async ({ data }: any) => {
         const record = { id: id(), createdAt: now(), updatedAt: now(), deletedAt: null, ...data };
         clients.push(record);
         return record;
       },
+      update: async ({ where, data }: any) => {
+        const record = clients.find((client) => client.id === where.id);
+        Object.assign(record, data, { updatedAt: now() });
+        return record;
+      },
       deleteMany: async () => ({ count: 0 }),
     },
     product: {
-      findMany: async ({ where }: any = {}) =>
+      findMany: async ({ where, skip = 0, take = 50 }: any = {}) => {
+        const search = where?.OR?.[0]?.name?.contains ?? where?.OR?.[1]?.sku?.contains;
+        return products
+          .filter(
+            (product) =>
+              product.deletedAt === null &&
+              (!where?.status || product.status === where.status) &&
+              matchesSearch(`${product.name} ${product.sku} ${product.category}`, search),
+          )
+          .slice(skip, skip + take);
+      },
+      count: async ({ where }: any = {}) =>
         products.filter(
           (product) =>
-            product.status === "ACTIVE" &&
-            product.deletedAt === null &&
-            matchesSearch(`${product.name} ${product.sku}`, where?.OR?.[0]?.name?.contains),
-        ),
+            product.deletedAt === null && (!where?.status || product.status === where.status),
+        ).length,
       findFirst: async ({ where }: any) =>
         products.find(
           (product) =>
-            product.id === where.id && product.status === "ACTIVE" && product.deletedAt === null,
+            (!where.id || product.id === where.id) &&
+            (!where.sku || product.sku === where.sku) &&
+            (!where.status || product.status === where.status) &&
+            (where.deletedAt === undefined || product.deletedAt === where.deletedAt),
         ) ?? null,
       create: async ({ data }: any) => {
         const record = { id: id(), createdAt: now(), updatedAt: now(), deletedAt: null, ...data };
@@ -296,18 +334,39 @@ function createMemoryPrisma() {
       deleteMany: async () => ({ count: 0 }),
     },
     service: {
-      findMany: async ({ where }: any = {}) =>
+      findMany: async ({ where, skip = 0, take = 50 }: any = {}) => {
+        const search = where?.OR?.[0]?.name?.contains ?? where?.OR?.[1]?.category?.contains;
+        return services
+          .filter(
+            (service) =>
+              service.deletedAt === null &&
+              (!where?.status || service.status === where.status) &&
+              matchesSearch(`${service.name} ${service.category}`, search),
+          )
+          .slice(skip, skip + take);
+      },
+      count: async ({ where }: any = {}) =>
         services.filter(
           (service) =>
-            service.status === "ACTIVE" &&
-            service.deletedAt === null &&
-            matchesSearch(`${service.name} ${service.category}`, where?.OR?.[0]?.name?.contains),
-        ),
+            service.deletedAt === null && (!where?.status || service.status === where.status),
+        ).length,
       findFirst: async ({ where }: any) =>
         services.find(
           (service) =>
-            service.id === where.id && service.status === "ACTIVE" && service.deletedAt === null,
+            (!where.id || service.id === where.id) &&
+            (!where.status || service.status === where.status) &&
+            (where.deletedAt === undefined || service.deletedAt === where.deletedAt),
         ) ?? null,
+      create: async ({ data }: any) => {
+        const record = { id: id(), createdAt: now(), updatedAt: now(), deletedAt: null, ...data };
+        services.push(record);
+        return record;
+      },
+      update: async ({ where, data }: any) => {
+        const record = services.find((service) => service.id === where.id);
+        Object.assign(record, data, { updatedAt: now() });
+        return record;
+      },
       upsert: async ({ where, create, update }: any) => {
         const record = services.find((service) => service.id === where.id);
         if (record) return Object.assign(record, update);
@@ -510,14 +569,46 @@ function createMemoryPrisma() {
             (!where.workOrderItemId || movement.workOrderItemId === where.workOrderItemId) &&
             (!where.productId || movement.productId === where.productId),
         ) ?? null,
-      findMany: async ({ where }: any = {}) =>
+      findMany: async ({ where, skip = 0, take = 20 }: any = {}) =>
+        stockMovements
+          .filter((movement) => !where?.productId || movement.productId === where.productId)
+          .slice(skip, skip + take)
+          .map((movement) => ({
+            ...movement,
+            product: products.find((product) => product.id === movement.productId),
+          })),
+      count: async ({ where }: any = {}) =>
         stockMovements.filter(
           (movement) => !where?.productId || movement.productId === where.productId,
-        ),
+        ).length,
       create: async ({ data }: any) => {
         const record = { id: id(), createdAt: now(), updatedAt: now(), ...data };
         stockMovements.push(record);
         return record;
+      },
+      deleteMany: async () => ({ count: 0 }),
+    },
+    payment: {
+      findMany: async ({ where, skip = 0, take = 20 }: any = {}) =>
+        payments
+          .filter((payment) => !where?.status || payment.status === where.status)
+          .slice(skip, skip + take)
+          .map(attachPaymentRelations),
+      count: async ({ where }: any = {}) =>
+        payments.filter((payment) => !where?.status || payment.status === where.status).length,
+      findUnique: async ({ where }: any) => {
+        const payment = payments.find((record) => record.id === where.id);
+        return payment ? attachPaymentRelations(payment) : null;
+      },
+      create: async ({ data }: any) => {
+        const record = { id: id(), createdAt: now(), updatedAt: now(), ...data };
+        payments.push(record);
+        return attachPaymentRelations(record);
+      },
+      update: async ({ where, data }: any) => {
+        const record = payments.find((payment) => payment.id === where.id);
+        Object.assign(record, data, { updatedAt: now() });
+        return attachPaymentRelations(record);
       },
       deleteMany: async () => ({ count: 0 }),
     },

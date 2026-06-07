@@ -21,3 +21,14 @@ clientRouter.post(
   validateBody(clientInputSchema),
   (request, response) => controller.create(request, response),
 );
+clientRouter.get("/:id", (request, response) => controller.detail(request, response));
+clientRouter.get("/:id/history", (request, response) => controller.history(request, response));
+clientRouter.patch(
+  "/:id",
+  authorize("ADMIN", "ATENDENTE"),
+  validateBody(clientInputSchema.partial()),
+  (request, response) => controller.update(request, response),
+);
+clientRouter.delete("/:id", authorize("ADMIN"), (request, response) =>
+  controller.remove(request, response),
+);

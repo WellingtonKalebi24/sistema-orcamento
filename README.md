@@ -4,7 +4,7 @@ Aplicacao web para empresas de manutencao e assistencia tecnica, planejada com f
 
 ## Estado Atual
 
-Esta implementacao cobre `T001` a `T067`: workspace, API Express versionada, Prisma schema/migration/seed, JWT com refresh token, RBAC, clientes minimos, catalogo, criacao/listagem/status de orcamentos, calculo decimal, download de PDF, ordens de servico manuais ou convertidas de orcamento aprovado, baixa automatica de estoque na conclusao da OS, anexos de OS e telas iniciais em React/Vite para login, cliente, orcamento e OS.
+Esta implementacao cobre `T001` a `T092`: workspace, API Express versionada, Prisma schema/migration/seed, JWT com refresh token, RBAC, clientes, catalogos de servicos e produtos, estoque manual, orcamentos com PDF, ordens de servico, baixa automatica de estoque, anexos, pagamentos, dashboard e relatorios basicos.
 
 ## Requisitos
 
@@ -60,6 +60,10 @@ Usuario inicial do seed:
 7. Com o orcamento aprovado, clicar em **Gerar ordem de servico**.
 8. Abrir **Ordens de servico**, acompanhar status, enviar anexos e concluir a OS.
 9. Ao concluir a OS, os produtos usados sao baixados do estoque e a movimentacao fica registrada.
+10. Abrir **Produtos** para manter pecas, saldos e alerta de estoque baixo.
+11. Abrir **Estoque** para registrar entrada, saida ou ajuste manual com historico.
+12. Abrir **Financeiro** para registrar pagamentos vinculados a orcamento ou OS.
+13. Conferir **Dashboard** e **Relatorios** para indicadores operacionais e financeiros.
 
 Observacao: a criacao/aprovacao de orcamento nao movimenta estoque; a baixa automatica acontece somente ao concluir a ordem de servico ou por movimentacao manual futura.
 
@@ -75,6 +79,16 @@ Observacao: a criacao/aprovacao de orcamento nao movimenta estoque; a baixa auto
 - `POST /api/v1/work-orders/:id/attachments`
 - `GET /api/v1/work-orders/attachments/:id/download`
 - `GET /api/v1/attachments/:id/download`
+
+## Rotas Implementadas das Fases 5 e 6
+
+- `GET/POST /api/v1/clients`, `GET/PATCH/DELETE /api/v1/clients/:id`, `GET /api/v1/clients/:id/history`
+- `GET/POST /api/v1/services`, `GET/PATCH/DELETE /api/v1/services/:id`
+- `GET/POST /api/v1/products`, `GET /api/v1/products/low-stock`, `GET/PATCH/DELETE /api/v1/products/:id`
+- `GET /api/v1/stock-movements`, `POST /api/v1/products/:id/stock-movements`
+- `GET/POST /api/v1/payments`, `PATCH /api/v1/payments/:id`
+- `GET /api/v1/dashboard/summary`
+- `GET /api/v1/reports`
 
 ## Comandos
 

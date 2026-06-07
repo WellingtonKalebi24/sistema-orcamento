@@ -16,9 +16,29 @@ export class ClientService {
     return this.clients.create({ ...input, email: input.email || null });
   }
 
+  async update(id: string, input: Partial<ClientInput>) {
+    const current = await this.findById(id);
+    if (input.document && input.document !== current.document) {
+      const existing = await this.clients.findByDocument(input.document);
+      if (existing) throw AppError.conflict("CPF/CNPJ ja cadastrado.");
+    }
+    return this.clients.update(id, { ...input, email: input.email || null });
+  }
+
   async findById(id: string) {
     const client = await this.clients.findById(id);
     if (!client) throw AppError.notFound("Cliente nao encontrado.");
     return client;
+  }
+
+  async history(id: string) {
+    const client = await this.clients.findHistoryById(id);
+    if (!client) throw AppError.notFound("Cliente nao encontrado.");
+    return client;
+  }
+
+  async remove(id: string) {
+    await this.findById(id);
+    return this.clients.softDelete(id);
   }
 }
