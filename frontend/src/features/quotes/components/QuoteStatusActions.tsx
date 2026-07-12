@@ -1,5 +1,6 @@
-import { changeQuoteStatus } from "../api/quotes.api";
 import type { Quote, QuoteStatus } from "../../../lib/api/schema";
+import { quoteStatusLabels } from "../../../lib/formatters/labels";
+import { changeQuoteStatus } from "../api/quotes.api";
 
 const actions: QuoteStatus[] = ["ENVIADO", "APROVADO", "RECUSADO", "EXPIRADO"];
 
@@ -19,7 +20,7 @@ export function QuoteStatusActions({
           type="button"
           onClick={() => changeQuoteStatus(quote.id, status).then(onChange)}
         >
-          {status}
+          {quoteStatusLabels[status]}
         </button>
       ))}
     </div>

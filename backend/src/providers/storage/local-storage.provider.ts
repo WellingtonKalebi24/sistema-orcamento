@@ -9,6 +9,9 @@ export class LocalStorageProvider implements StorageProvider {
   constructor(private readonly baseDir = path.resolve(env.UPLOAD_DIR)) {}
 
   async save(file: FileToStore) {
+    if (file.buffer.length > env.UPLOAD_MAX_BYTES) {
+      throw new Error("Arquivo excede o tamanho maximo permitido.");
+    }
     await mkdir(this.baseDir, { recursive: true });
     const extension = path.extname(file.originalName).toLowerCase();
     const storageKey = `${randomUUID()}${extension}`;

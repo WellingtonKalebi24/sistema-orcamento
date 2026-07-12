@@ -11,10 +11,13 @@ import { PaymentsPage } from "../features/payments/pages/PaymentsPage";
 import { ProductsPage } from "../features/products/pages/ProductsPage";
 import { StockMovementsPage } from "../features/products/pages/StockMovementsPage";
 import { NewQuotePage } from "../features/quotes/pages/NewQuotePage";
+import { EditQuotePage } from "../features/quotes/pages/EditQuotePage";
 import { QuoteDetailPage } from "../features/quotes/pages/QuoteDetailPage";
 import { QuotesPage } from "../features/quotes/pages/QuotesPage";
 import { ReportsPage } from "../features/reports/pages/ReportsPage";
 import { ServicesPage } from "../features/services/pages/ServicesPage";
+import { CompanySettingsPage } from "../features/settings/pages/CompanySettingsPage";
+import { UsersPage } from "../features/users/pages/UsersPage";
 import { NewWorkOrderPage } from "../features/work-orders/pages/NewWorkOrderPage";
 import { WorkOrderDetailPage } from "../features/work-orders/pages/WorkOrderDetailPage";
 import { WorkOrdersPage } from "../features/work-orders/pages/WorkOrdersPage";
@@ -37,6 +40,7 @@ export function AppRoutes() {
           <Route path="/clientes/:id" element={<ClientDetailPage />} />
           <Route path="/orcamentos" element={<QuotesPage />} />
           <Route path="/orcamentos/novo" element={<NewQuotePage />} />
+          <Route path="/orcamentos/:id/editar" element={<EditQuotePage />} />
           <Route path="/orcamentos/:id" element={<QuoteDetailPage />} />
           <Route path="/ordens" element={<WorkOrdersPage />} />
           <Route path="/ordens/nova" element={<NewWorkOrderPage />} />
@@ -46,6 +50,22 @@ export function AppRoutes() {
           <Route path="/estoque/movimentos" element={<StockMovementsPage />} />
           <Route path="/financeiro" element={<PaymentsPage />} />
           <Route path="/relatorios" element={<ReportsPage />} />
+          <Route
+            path="/usuarios"
+            element={
+              <ProtectedRoute resource="users">
+                <UsersPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/configuracoes"
+            element={
+              <ProtectedRoute resource="settings">
+                <CompanySettingsPage />
+              </ProtectedRoute>
+            }
+          />
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 
 import type { WorkOrder } from "../../../lib/api/schema";
 import { formatCurrency } from "../../../lib/formatters/currency";
+import { workOrderStatusLabels } from "../../../lib/formatters/labels";
 import { AttachmentPanel } from "../components/AttachmentPanel";
 import { ExecutionForm } from "../components/ExecutionForm";
 import { WorkOrderStatusPanel } from "../components/WorkOrderStatusPanel";
@@ -22,7 +23,7 @@ export function WorkOrderDetailPage() {
     <section className="panel">
       <p className="eyebrow">Ordem de servico</p>
       <h2>
-        {workOrder.number} - {workOrder.status}
+        {workOrder.number} - {workOrderStatusLabels[workOrder.status]}
       </h2>
       <p>{workOrder.client?.name}</p>
       <p>{workOrder.problemDescription}</p>

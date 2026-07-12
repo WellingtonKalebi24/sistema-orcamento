@@ -4,7 +4,7 @@ import { moneySchema, quantitySchema } from "./common.schemas";
 
 export const productInputSchema = z.object({
   name: z.string().trim().min(2),
-  sku: z.string().trim().min(2),
+  sku: z.string().trim().min(2).optional(),
   category: z.string().trim().min(2),
   supplier: z.string().trim().optional(),
   unit: z.string().trim().min(1).default("UN"),

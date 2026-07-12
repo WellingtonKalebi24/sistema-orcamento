@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 
 import type { WorkOrder } from "../../../lib/api/schema";
 import { formatCurrency } from "../../../lib/formatters/currency";
+import { workOrderStatusLabels } from "../../../lib/formatters/labels";
 import { listWorkOrders } from "../api/work-orders.api";
 
 export function WorkOrdersPage() {
@@ -34,7 +35,7 @@ export function WorkOrdersPage() {
           >
             <strong>{workOrder.number}</strong>
             <span>{workOrder.client?.name ?? "Cliente"}</span>
-            <span>{workOrder.status}</span>
+            <span>{workOrderStatusLabels[workOrder.status]}</span>
             <span>{formatCurrency(workOrder.chargedAmount)}</span>
           </Link>
         ))}

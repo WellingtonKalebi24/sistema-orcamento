@@ -1,6 +1,6 @@
 # Quickstart Planejado: Sistema de Orcamentos e Ordens de Servico
 
-Este guia descreve como o projeto devera ser preparado e verificado durante a implementacao. Nesta fase de planejamento ainda nao existem aplicacoes executaveis.
+Este guia descreve como preparar, executar e verificar o MVP implementado.
 
 ## 1. Pre-requisitos de Desenvolvimento
 
@@ -68,6 +68,21 @@ npm run lint
 npm run typecheck
 npm run test --workspace backend
 npm run build
+```
+
+## 5.1 Comandos Atuais do MVP
+
+```bash
+npm install
+npm run db:up
+npm run dev
+npm run format:check
+npm run lint
+npm run typecheck
+npm run test --workspace backend
+npm run test --workspace frontend
+npm run build
+npm run validate:openapi
 ```
 
 ## 6. Dados Minimos para Demonstracao

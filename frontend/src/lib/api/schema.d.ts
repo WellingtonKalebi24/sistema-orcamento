@@ -62,15 +62,26 @@ export type Quote = {
   status: QuoteStatus;
   requestDescription: string;
   notes?: string;
+  validUntil: string;
+  laborAmount: string;
+  travelFee: string;
+  generalDiscount: string;
+  paymentTerms?: string;
+  executionDeadline?: string;
   totalAmount: string;
   estimatedCost: string;
   estimatedProfit: string;
   client?: Client;
+  workOrder?: WorkOrder | null;
   items?: Array<{
     id: string;
+    type: ItemType;
+    productId?: string;
+    serviceId?: string;
     descriptionSnapshot: string;
     quantity: string;
     unitPrice: string;
+    discountAmount: string;
     total: string;
   }>;
 };
@@ -95,6 +106,27 @@ export type Attachment = {
   mimeType: string;
   sizeBytes: number;
   createdAt: string;
+};
+
+export type CompanySettings = {
+  id: string;
+  companyName: string;
+  systemName: string;
+  cnpj: string;
+  phone?: string;
+  whatsapp?: string;
+  email?: string;
+  address?: string;
+  pixKey?: string;
+  bankDetails?: string;
+  defaultQuoteText?: string;
+  defaultPdfFooter?: string;
+  logoAttachmentId?: string;
+  allowNegativeStock: boolean;
+  primaryColor: string;
+  sidebarColor: string;
+  timezone: string;
+  logoAttachment?: Attachment;
 };
 
 export type StockMovement = {
@@ -141,6 +173,50 @@ export type DashboardSummary = {
   topProducts: CatalogProduct[];
   latestQuotes: Quote[];
   latestWorkOrders: WorkOrder[];
+  details: {
+    quotesMonth: DashboardQuoteDetail[];
+    quotesApproved: DashboardQuoteDetail[];
+    monthlyRevenue: Array<{
+      id: string;
+      documentId?: string;
+      status: string;
+      paidAmount: string;
+      amount: string;
+    }>;
+    estimatedProfit: Array<{
+      id: string;
+      number: string;
+      client: string;
+      status: WorkOrderStatus;
+      chargedAmount: string;
+      totalCost: string;
+      estimatedProfit: string;
+    }>;
+    openWorkOrders: DashboardWorkOrderDetail[];
+    inProgressServices: DashboardWorkOrderDetail[];
+    lowStock: Array<{
+      id: string;
+      name: string;
+      stockQuantity: string;
+      minimumStock: string;
+    }>;
+    clients: Array<{ id: string; name: string; document?: string }>;
+  };
+};
+
+export type DashboardQuoteDetail = {
+  id: string;
+  number: string;
+  client: string;
+  status: QuoteStatus;
+  amount: string;
+};
+
+export type DashboardWorkOrderDetail = {
+  id: string;
+  number: string;
+  client: string;
+  status: WorkOrderStatus;
 };
 
 export type WorkOrder = {

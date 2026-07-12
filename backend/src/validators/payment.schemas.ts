@@ -1,10 +1,10 @@
 import { z } from "zod";
 
-import { moneySchema } from "./common.schemas";
+import { moneySchema, uuidSchema } from "./common.schemas";
 
 const paymentBaseSchema = z.object({
-  quoteId: z.string().uuid().optional(),
-  workOrderId: z.string().uuid().optional(),
+  quoteId: uuidSchema.optional(),
+  workOrderId: uuidSchema.optional(),
   method: z.enum(["DINHEIRO", "PIX", "CARTAO", "BOLETO", "TRANSFERENCIA"]),
   amount: moneySchema,
   paidAmount: moneySchema.default("0.00"),

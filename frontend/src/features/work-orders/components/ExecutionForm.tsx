@@ -1,5 +1,6 @@
 import { useState } from "react";
 
+import { getApiErrorMessage } from "../../../lib/api/errors";
 import type { WorkOrder } from "../../../lib/api/schema";
 import { completeWorkOrder } from "../api/work-orders.api";
 
@@ -16,18 +17,36 @@ export function ExecutionForm({
   const [clientNotes, setClientNotes] = useState(workOrder.clientNotes ?? "");
   const [internalNotes, setInternalNotes] = useState(workOrder.internalNotes ?? "");
   const [error, setError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
   async function submit(event: React.FormEvent) {
     event.preventDefault();
     setError("");
+    setSubmitting(true);
     try {
       onChange(
         await completeWorkOrder(workOrder.id, { executionDescription, clientNotes, internalNotes }),
       );
     } catch (caught) {
-      const fallback = caught instanceof Error ? caught.message : "Nao foi possivel concluir a OS.";
-      setError(fallback);
+      setError(getApiErrorMessage(caught, "Nao foi possivel concluir a OS."));
+    } finally {
+      setSubmitting(false);
     }
+  }
+
+  if (workOrder.status === "CONCLUIDA") {
+    return (
+      <div className="success-message completion-message">
+        <strong>Ordem de servico concluida com sucesso</strong>
+        <p>A baixa das pecas utilizadas ja foi registrada no estoque.</p>
+      </div>
+    );
+  }
+
+  if (workOrder.status === "CANCELADA") {
+    return (
+      <div className="info-message">Esta ordem foi cancelada e nao pode mais ser concluida.</div>
+    );
   }
 
   return (
@@ -51,8 +70,8 @@ export function ExecutionForm({
         />
       </label>
       {error ? <p className="form-error span-2">{error}</p> : null}
-      <button className="button-primary" disabled={workOrder.status === "CONCLUIDA"} type="submit">
-        Concluir OS e baixar estoque
+      <button className="button-primary" disabled={submitting} type="submit">
+        {submitting ? "Concluindo..." : "Concluir OS e baixar estoque"}
       </button>
     </form>
   );

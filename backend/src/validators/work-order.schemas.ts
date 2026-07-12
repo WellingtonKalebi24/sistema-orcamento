@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { moneySchema, quantitySchema } from "./common.schemas";
+import { moneySchema, quantitySchema, uuidSchema } from "./common.schemas";
 
 export const workOrderStatusSchema = z.enum([
   "ABERTA",
@@ -20,8 +20,8 @@ export const workOrderEditableStatusSchema = z.enum([
 const workOrderItemInputSchema = z
   .object({
     type: z.enum(["SERVICE", "PRODUCT"]),
-    productId: z.string().uuid().optional(),
-    serviceId: z.string().uuid().optional(),
+    productId: uuidSchema.optional(),
+    serviceId: uuidSchema.optional(),
     plannedQuantity: quantitySchema.default("1.000"),
     usedQuantity: quantitySchema.default("0.000"),
     unitPrice: moneySchema.optional(),
@@ -36,8 +36,8 @@ const workOrderItemInputSchema = z
   );
 
 export const workOrderInputSchema = z.object({
-  clientId: z.string().uuid(),
-  technicianId: z.string().uuid().optional(),
+  clientId: uuidSchema,
+  technicianId: uuidSchema.optional(),
   expectedAt: z.coerce.date().optional(),
   problemDescription: z.string().trim().min(3),
   executionDescription: z.string().trim().optional(),
@@ -56,7 +56,7 @@ export const workOrderUpdateSchema = workOrderInputSchema
   });
 
 export const workOrderConversionSchema = z.object({
-  technicianId: z.string().uuid().optional(),
+  technicianId: uuidSchema.optional(),
   expectedAt: z.coerce.date().optional(),
 });
 

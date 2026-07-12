@@ -8,6 +8,12 @@ function isLowStock(product: ProductLike) {
   return Number(product.stockQuantity) <= Number(product.minimumStock);
 }
 
+function createInternalCode() {
+  const timestamp = Date.now().toString(36).toUpperCase();
+  const random = Math.random().toString(36).slice(2, 6).toUpperCase();
+  return `PRD-${timestamp}-${random}`;
+}
+
 export class ProductService {
   constructor(private readonly products = new ProductRepository()) {}
 
@@ -44,7 +50,7 @@ export class ProductService {
   }
 
   create(input: ProductInput) {
-    return this.products.create(input);
+    return this.products.create({ ...input, sku: input.sku || createInternalCode() });
   }
 
   async update(id: string, input: ProductUpdateInput) {

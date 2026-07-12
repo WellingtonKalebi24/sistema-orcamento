@@ -1,6 +1,7 @@
 import multer from "multer";
 import { Router } from "express";
 
+import { env } from "../config/env";
 import { AttachmentController } from "../controllers/attachment.controller";
 import { WorkOrderController } from "../controllers/work-order.controller";
 import { authenticate } from "../middlewares/authenticate.middleware";
@@ -17,7 +18,10 @@ import {
 
 const controller = new WorkOrderController();
 const attachmentController = new AttachmentController();
-const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 8 * 1024 * 1024 } });
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: env.UPLOAD_MAX_BYTES },
+});
 
 export const workOrderRouter = Router();
 

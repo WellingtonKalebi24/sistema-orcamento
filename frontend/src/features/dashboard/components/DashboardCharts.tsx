@@ -1,8 +1,14 @@
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 
 import type { DashboardSummary } from "../../../lib/api/schema";
+import { quoteStatusLabels } from "../../../lib/formatters/labels";
 
 export function DashboardCharts({ summary }: { summary: DashboardSummary }) {
+  const quoteStatusData = summary.quoteStatus.map((item) => ({
+    ...item,
+    label: quoteStatusLabels[item.status],
+  }));
+
   return (
     <div className="panels">
       <div className="panel">
@@ -20,9 +26,9 @@ export function DashboardCharts({ summary }: { summary: DashboardSummary }) {
       <div className="panel">
         <p className="eyebrow">Status dos orcamentos</p>
         <ResponsiveContainer height={220} width="100%">
-          <BarChart data={summary.quoteStatus}>
+          <BarChart data={quoteStatusData}>
             <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="status" />
+            <XAxis dataKey="label" />
             <YAxis />
             <Tooltip />
             <Bar dataKey="total" fill="#12a56a" />

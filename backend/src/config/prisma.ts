@@ -1,5 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { randomUUID } from "node:crypto";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { basename, dirname, resolve } from "node:path";
 
 import { PrismaClient } from "@prisma/client";
 
@@ -45,8 +47,29 @@ function matchesSearch(value: unknown, search?: string) {
   );
 }
 
+const memoryStorageFile = resolve(
+  process.cwd(),
+  basename(process.cwd()).toLowerCase() === "backend"
+    ? "storage/local-data.json"
+    : "backend/storage/local-data.json",
+);
+
+function loadMemoryStore() {
+  if (!existsSync(memoryStorageFile)) return undefined;
+
+  try {
+    return JSON.parse(readFileSync(memoryStorageFile, "utf8"), (key, value) => {
+      if (typeof value === "string" && /(At|Date)$/.test(key)) return new Date(value);
+      return value;
+    });
+  } catch {
+    return undefined;
+  }
+}
+
 function createMemoryPrisma() {
-  const users: any[] = [
+  const stored = loadMemoryStore();
+  const users: any[] = stored?.users ?? [
     {
       id: "00000000-0000-0000-0000-000000000001",
       name: "Administrador",
@@ -59,8 +82,8 @@ function createMemoryPrisma() {
       deletedAt: null,
     },
   ];
-  const refreshTokens: any[] = [];
-  const clients: any[] = [
+  const refreshTokens: any[] = stored?.refreshTokens ?? [];
+  const clients: any[] = stored?.clients ?? [
     {
       id: "00000000-0000-0000-0000-000000000101",
       name: "Cliente Demonstracao",
@@ -76,7 +99,7 @@ function createMemoryPrisma() {
       deletedAt: null,
     },
   ];
-  const products: any[] = [
+  const products: any[] = stored?.products ?? [
     {
       id: "00000000-0000-0000-0000-000000000301",
       name: "Peca demonstracao",
@@ -94,7 +117,7 @@ function createMemoryPrisma() {
       deletedAt: null,
     },
   ];
-  const services: any[] = [
+  const services: any[] = stored?.services ?? [
     {
       id: "00000000-0000-0000-0000-000000000201",
       name: "Diagnostico tecnico",
@@ -108,18 +131,19 @@ function createMemoryPrisma() {
       deletedAt: null,
     },
   ];
-  const quotes: any[] = [];
-  const quoteItems: any[] = [];
-  const workOrders: any[] = [];
-  const workOrderItems: any[] = [];
-  const stockMovements: any[] = [];
-  const payments: any[] = [];
-  const attachments: any[] = [];
-  const auditLogs: any[] = [];
-  const sequences = new Map<string, any>();
-  const company = {
+  const quotes: any[] = stored?.quotes ?? [];
+  const quoteItems: any[] = stored?.quoteItems ?? [];
+  const workOrders: any[] = stored?.workOrders ?? [];
+  const workOrderItems: any[] = stored?.workOrderItems ?? [];
+  const stockMovements: any[] = stored?.stockMovements ?? [];
+  const payments: any[] = stored?.payments ?? [];
+  const attachments: any[] = stored?.attachments ?? [];
+  const auditLogs: any[] = stored?.auditLogs ?? [];
+  const sequences = new Map<string, any>(Object.entries(stored?.sequences ?? {}));
+  const company = stored?.company ?? {
     id: "00000000-0000-0000-0000-000000000901",
     companyName: "Empresa de Manutencao",
+    systemName: "Sistema OS",
     cnpj: "00000000000191",
     phone: "(11) 3333-3333",
     whatsapp: "(11) 99999-9999",
@@ -130,16 +154,58 @@ function createMemoryPrisma() {
     defaultPdfFooter: "Atendimento em horario comercial.",
     logoAttachmentId: null,
     allowNegativeStock: false,
+    primaryColor: "#245dde",
+    sidebarColor: "#12233e",
     timezone: "America/Sao_Paulo",
     createdAt: now(),
     updatedAt: now(),
     logoAttachment: null,
   };
+  Object.assign(company, {
+    systemName: company.systemName ?? "Sistema OS",
+    primaryColor: company.primaryColor ?? "#245dde",
+    sidebarColor: company.sidebarColor ?? "#12233e",
+  });
+
+  function persist() {
+    mkdirSync(dirname(memoryStorageFile), { recursive: true });
+    writeFileSync(
+      memoryStorageFile,
+      JSON.stringify(
+        {
+          users,
+          refreshTokens,
+          clients,
+          products,
+          services,
+          quotes,
+          quoteItems,
+          workOrders,
+          workOrderItems,
+          stockMovements,
+          payments,
+          attachments,
+          auditLogs,
+          sequences: Object.fromEntries(sequences),
+          company,
+        },
+        null,
+        2,
+      ),
+      "utf8",
+    );
+  }
+
+  function saveResult<T>(value: T) {
+    persist();
+    return value;
+  }
 
   const attachQuoteRelations = (quote: any) => ({
     ...quote,
     client: clients.find((client) => client.id === quote.clientId),
     items: quoteItems.filter((item) => item.quoteId === quote.id),
+    workOrder: workOrders.find((workOrder) => workOrder.quoteId === quote.id) ?? null,
   });
 
   const attachWorkOrderRelations = (workOrder: any) => ({
@@ -169,12 +235,31 @@ function createMemoryPrisma() {
       : null,
   });
 
-  return {
+  const memoryClient = {
     $transaction: async (operations: unknown[] | ((client: unknown) => unknown)) =>
       typeof operations === "function"
-        ? operations(createMemoryPrisma())
+        ? operations(memoryClient)
         : Promise.all(operations as Promise<unknown>[]),
     user: {
+      findMany: async ({ where, skip = 0, take = 20 }: any = {}) => {
+        const search = where?.OR?.[0]?.name?.contains ?? where?.OR?.[1]?.email?.contains;
+        return users
+          .filter(
+            (user) =>
+              user.deletedAt === null &&
+              (!where?.role || user.role === where.role) &&
+              (!where?.status || user.status === where.status) &&
+              (matchesSearch(user.name, search) || matchesSearch(user.email, search)),
+          )
+          .slice(skip, skip + take);
+      },
+      count: async ({ where }: any = {}) =>
+        users.filter(
+          (user) =>
+            user.deletedAt === null &&
+            (!where?.role || user.role === where.role) &&
+            (!where?.status || user.status === where.status),
+        ).length,
       findFirst: async ({ where }: any) =>
         users.find(
           (user) =>
@@ -193,12 +278,12 @@ function createMemoryPrisma() {
           ...data,
         };
         users.push(record);
-        return record;
+        return saveResult(record);
       },
       update: async ({ where, data }: any) => {
         const record = users.find((user) => user.id === where.id);
         Object.assign(record, data, { updatedAt: now() });
-        return record;
+        return saveResult(record);
       },
       deleteMany: async () => ({ count: 0 }),
     },
@@ -213,7 +298,7 @@ function createMemoryPrisma() {
           ...data,
         };
         refreshTokens.push(record);
-        return record;
+        return saveResult(record);
       },
       findFirst: async ({ where, include }: any) => {
         const record =
@@ -229,14 +314,14 @@ function createMemoryPrisma() {
       update: async ({ where, data }: any) => {
         const record = refreshTokens.find((token) => token.id === where.id);
         Object.assign(record, data, { updatedAt: now() });
-        return record;
+        return saveResult(record);
       },
       updateMany: async ({ where, data }: any) => {
         const affected = refreshTokens.filter(
           (token) => token.tokenHash === where.tokenHash && token.revokedAt === where.revokedAt,
         );
         affected.forEach((token) => Object.assign(token, data));
-        return { count: affected.length };
+        return saveResult({ count: affected.length });
       },
       deleteMany: async () => ({ count: 0 }),
     },
@@ -273,12 +358,12 @@ function createMemoryPrisma() {
       create: async ({ data }: any) => {
         const record = { id: id(), createdAt: now(), updatedAt: now(), deletedAt: null, ...data };
         clients.push(record);
-        return record;
+        return saveResult(record);
       },
       update: async ({ where, data }: any) => {
         const record = clients.find((client) => client.id === where.id);
         Object.assign(record, data, { updatedAt: now() });
-        return record;
+        return saveResult(record);
       },
       deleteMany: async () => ({ count: 0 }),
     },
@@ -310,11 +395,11 @@ function createMemoryPrisma() {
       create: async ({ data }: any) => {
         const record = { id: id(), createdAt: now(), updatedAt: now(), deletedAt: null, ...data };
         products.push(record);
-        return record;
+        return saveResult(record);
       },
       upsert: async ({ where, create, update }: any) => {
         const record = products.find((product) => product.sku === where.sku);
-        if (record) return Object.assign(record, update);
+        if (record) return saveResult(Object.assign(record, update));
         const next = {
           id: id(),
           createdAt: now(),
@@ -324,12 +409,12 @@ function createMemoryPrisma() {
           ...create,
         };
         products.push(next);
-        return next;
+        return saveResult(next);
       },
       update: async ({ where, data }: any) => {
         const record = products.find((product) => product.id === where.id);
         Object.assign(record, data, { updatedAt: now() });
-        return record;
+        return saveResult(record);
       },
       deleteMany: async () => ({ count: 0 }),
     },
@@ -360,16 +445,16 @@ function createMemoryPrisma() {
       create: async ({ data }: any) => {
         const record = { id: id(), createdAt: now(), updatedAt: now(), deletedAt: null, ...data };
         services.push(record);
-        return record;
+        return saveResult(record);
       },
       update: async ({ where, data }: any) => {
         const record = services.find((service) => service.id === where.id);
         Object.assign(record, data, { updatedAt: now() });
-        return record;
+        return saveResult(record);
       },
       upsert: async ({ where, create, update }: any) => {
         const record = services.find((service) => service.id === where.id);
-        if (record) return Object.assign(record, update);
+        if (record) return saveResult(Object.assign(record, update));
         const next = {
           createdAt: now(),
           updatedAt: now(),
@@ -378,13 +463,20 @@ function createMemoryPrisma() {
           ...create,
         };
         services.push(next);
-        return next;
+        return saveResult(next);
       },
       deleteMany: async () => ({ count: 0 }),
     },
     companySettings: {
       findFirst: async () => company,
       create: async () => company,
+      update: async ({ data }: any) => {
+        Object.assign(company, data, { updatedAt: now() });
+        company.logoAttachment = company.logoAttachmentId
+          ? (attachments.find((attachment) => attachment.id === company.logoAttachmentId) ?? null)
+          : null;
+        return saveResult(company);
+      },
       upsert: async () => company,
     },
     documentSequence: {
@@ -400,14 +492,14 @@ function createMemoryPrisma() {
         };
         current.lastValue += update.lastValue.increment;
         sequences.set(key, current);
-        return current;
+        return saveResult(current);
       },
     },
     auditLog: {
       create: async ({ data }: any) => {
         const record = { id: id(), createdAt: now(), updatedAt: now(), ...data };
         auditLogs.push(record);
-        return record;
+        return saveResult(record);
       },
     },
     quote: {
@@ -445,7 +537,7 @@ function createMemoryPrisma() {
             ...item,
           });
         }
-        return attachQuoteRelations(quote);
+        return saveResult(attachQuoteRelations(quote));
       },
       update: async ({ where, data }: any) => {
         const quote = quotes.find((quote) => quote.id === where.id);
@@ -462,7 +554,7 @@ function createMemoryPrisma() {
         }
         delete data.items;
         Object.assign(quote, data, { updatedAt: now() });
-        return attachQuoteRelations(quote);
+        return saveResult(attachQuoteRelations(quote));
       },
       deleteMany: async () => ({ count: 0 }),
     },
@@ -472,7 +564,7 @@ function createMemoryPrisma() {
         for (let index = quoteItems.length - 1; index >= 0; index -= 1) {
           if (quoteItems[index].quoteId === where.quoteId) quoteItems.splice(index, 1);
         }
-        return { count: before - quoteItems.length };
+        return saveResult({ count: before - quoteItems.length });
       },
     },
     workOrder: {
@@ -531,7 +623,7 @@ function createMemoryPrisma() {
             ...item,
           });
         }
-        return attachWorkOrderRelations(workOrder);
+        return saveResult(attachWorkOrderRelations(workOrder));
       },
       update: async ({ where, data }: any) => {
         const workOrder = workOrders.find((record) => record.id === where.id);
@@ -548,7 +640,7 @@ function createMemoryPrisma() {
         }
         delete data.items;
         Object.assign(workOrder, data, { updatedAt: now() });
-        return attachWorkOrderRelations(workOrder);
+        return saveResult(attachWorkOrderRelations(workOrder));
       },
       deleteMany: async () => ({ count: 0 }),
     },
@@ -559,7 +651,7 @@ function createMemoryPrisma() {
           if (workOrderItems[index].workOrderId === where.workOrderId)
             workOrderItems.splice(index, 1);
         }
-        return { count: before - workOrderItems.length };
+        return saveResult({ count: before - workOrderItems.length });
       },
     },
     stockMovement: {
@@ -584,7 +676,7 @@ function createMemoryPrisma() {
       create: async ({ data }: any) => {
         const record = { id: id(), createdAt: now(), updatedAt: now(), ...data };
         stockMovements.push(record);
-        return record;
+        return saveResult(record);
       },
       deleteMany: async () => ({ count: 0 }),
     },
@@ -603,12 +695,12 @@ function createMemoryPrisma() {
       create: async ({ data }: any) => {
         const record = { id: id(), createdAt: now(), updatedAt: now(), ...data };
         payments.push(record);
-        return attachPaymentRelations(record);
+        return saveResult(attachPaymentRelations(record));
       },
       update: async ({ where, data }: any) => {
         const record = payments.find((payment) => payment.id === where.id);
         Object.assign(record, data, { updatedAt: now() });
-        return attachPaymentRelations(record);
+        return saveResult(attachPaymentRelations(record));
       },
       deleteMany: async () => ({ count: 0 }),
     },
@@ -634,14 +726,16 @@ function createMemoryPrisma() {
           ...data,
         };
         attachments.push(record);
-        return record;
+        return saveResult(record);
       },
       update: async ({ where, data }: any) => {
         const record = attachments.find((attachment) => attachment.id === where.id);
         Object.assign(record, data, { updatedAt: now() });
-        return record;
+        return saveResult(record);
       },
       deleteMany: async () => ({ count: 0 }),
     },
   };
+
+  return memoryClient;
 }

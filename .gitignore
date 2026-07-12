@@ -11,9 +11,12 @@ coverage/
 !.env.example
 backend/uploads/
 backend/storage/
+backend/backend/
 *.log
 npm-debug.log*
 .logs/
+.tmp-demo-zip/
+sistema-orcamento-demo.zip
 
 # Editors and operating systems
 .vscode/

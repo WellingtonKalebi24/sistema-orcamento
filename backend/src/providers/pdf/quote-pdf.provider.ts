@@ -18,6 +18,7 @@ type QuotePdfData = {
   client?: Record<string, unknown>;
   clientSnapshot?: Record<string, unknown> | null;
   companySnapshot?: Record<string, unknown> | null;
+  logoBuffer?: Buffer;
   items: Array<{
     descriptionSnapshot: string;
     quantity: string;
@@ -41,6 +42,14 @@ export class QuotePdfProvider {
       doc.on("error", reject);
 
       const company = quote.companySnapshot ?? {};
+      if (quote.logoBuffer) {
+        try {
+          doc.image(quote.logoBuffer, 48, 42, { fit: [90, 55] });
+          doc.x = 150;
+        } catch {
+          // A identidade textual continua disponivel quando a imagem for invalida.
+        }
+      }
       doc
         .fontSize(18)
         .text(text(company.companyName) || "Orcamento de Servicos", { align: "left" });

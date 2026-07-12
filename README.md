@@ -4,7 +4,7 @@ Aplicacao web para empresas de manutencao e assistencia tecnica, planejada com f
 
 ## Estado Atual
 
-Esta implementacao cobre `T001` a `T092`: workspace, API Express versionada, Prisma schema/migration/seed, JWT com refresh token, RBAC, clientes, catalogos de servicos e produtos, estoque manual, orcamentos com PDF, ordens de servico, baixa automatica de estoque, anexos, pagamentos, dashboard e relatorios basicos.
+Esta implementacao cobre `T001` a `T110`: workspace, API Express versionada, Prisma schema/migration/seed, JWT com refresh token, RBAC, clientes, catalogos de servicos e produtos, estoque manual, orcamentos com PDF, ordens de servico, baixa automatica de estoque, anexos, pagamentos, dashboard, relatorios basicos, usuarios, configuracoes da empresa, logo, CI, conteinerizacao e documentacao de deploy/uso.
 
 ## Requisitos
 
@@ -14,6 +14,31 @@ Esta implementacao cobre `T001` a `T092`: workspace, API Express versionada, Pri
 - Docker Desktop ou PostgreSQL 17 instalado localmente.
 
 ## Configuracao Local
+
+### Demonstracao rapida para cliente
+
+Em Windows, a forma mais simples de abrir o sistema para apresentacao e executar:
+
+```bat
+iniciar-demo-windows.bat
+```
+
+O script instala dependencias na primeira execucao, cria `.env` se necessario, inicia API e frontend e abre o navegador em `http://localhost:5173/login`.
+
+Login de demonstracao:
+
+- E-mail: `admin@sistema.local`
+- Senha: `Admin@12345`
+
+Para encerrar os processos da demonstracao:
+
+```bat
+parar-demo-windows.bat
+```
+
+Guia completo: `docs/demo-cliente.md`.
+
+### Desenvolvimento com banco PostgreSQL
 
 1. Crie um arquivo `.env` a partir de `.env.example` e substitua segredos antes de qualquer deploy.
 2. Instale dependencias:
@@ -49,6 +74,11 @@ Usuario inicial do seed:
 - E-mail: `admin@sistema.local`
 - Senha: `Admin@12345`
 
+Usuarios adicionais do seed:
+
+- `atendente@sistema.local`, `tecnico@sistema.local`, `financeiro@sistema.local`
+- Senha: `Usuario@12345`
+
 ## Roteiro Rapido para Testar
 
 1. Entrar em `http://localhost:5173/login`.
@@ -64,6 +94,8 @@ Usuario inicial do seed:
 11. Abrir **Estoque** para registrar entrada, saida ou ajuste manual com historico.
 12. Abrir **Financeiro** para registrar pagamentos vinculados a orcamento ou OS.
 13. Conferir **Dashboard** e **Relatorios** para indicadores operacionais e financeiros.
+14. Abrir **Usuarios** para administrar perfis.
+15. Abrir **Empresa** para configurar dados, logo, Pix, textos do PDF e estoque negativo.
 
 Observacao: a criacao/aprovacao de orcamento nao movimenta estoque; a baixa automatica acontece somente ao concluir a ordem de servico ou por movimentacao manual futura.
 
@@ -89,6 +121,18 @@ Observacao: a criacao/aprovacao de orcamento nao movimenta estoque; a baixa auto
 - `GET/POST /api/v1/payments`, `PATCH /api/v1/payments/:id`
 - `GET /api/v1/dashboard/summary`
 - `GET /api/v1/reports`
+
+## Rotas Implementadas da Fase 7
+
+- `GET/POST /api/v1/users`, `GET/PATCH/DELETE /api/v1/users/:id`
+- `GET/PATCH /api/v1/company-settings`
+- `POST /api/v1/company-settings/logo`
+
+## Deploy e Operacao
+
+- Deploy inicial: `docs/deployment.md`
+- Guia do usuario: `docs/user-guide.md`
+- Relatorio de aceite: `docs/acceptance-report.md`
 
 ## Comandos
 

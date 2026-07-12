@@ -353,6 +353,7 @@ model Payment {
 model CompanySettings {
   id                 String      @id @default(uuid())
   companyName        String
+  systemName         String      @default("Sistema OS")
   cnpj               String
   phone              String?
   whatsapp           String?
@@ -364,6 +365,8 @@ model CompanySettings {
   defaultPdfFooter   String?
   logoAttachmentId   String?     @unique
   allowNegativeStock Boolean     @default(false)
+  primaryColor       String      @default("#245dde")
+  sidebarColor       String      @default("#12233e")
   timezone           String      @default("America/Sao_Paulo")
   createdAt          DateTime    @default(now())
   updatedAt          DateTime    @updatedAt

@@ -18,9 +18,19 @@ export function applySecurity(app: Express) {
 
 export const authRateLimit = rateLimit({
   windowMs: 15 * 60 * 1000,
-  limit: 50,
+  limit: env.NODE_ENV === "production" ? 50 : 500,
   standardHeaders: true,
   legacyHeaders: false,
+  skipSuccessfulRequests: true,
+  handler: (_request, response) =>
+    response.status(429).json({
+      success: false,
+      error: {
+        code: "TOO_MANY_REQUESTS",
+        message: "Muitas tentativas de acesso. Aguarde alguns minutos e tente novamente.",
+        details: [],
+      },
+    }),
 });
 
 function expressBodyLimit() {

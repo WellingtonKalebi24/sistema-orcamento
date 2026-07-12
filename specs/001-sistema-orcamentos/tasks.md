@@ -198,17 +198,17 @@
 
 ### Testes para User Story 5
 
-- [ ] T093 [P] [US5] Escrever testes de integracao de CRUD/inativacao de usuarios, perfis e bloqueio de acesso direto em `backend/tests/integration/users-authorization.routes.spec.ts`
-- [ ] T094 [P] [US5] Escrever testes de configuracoes, upload de logo e auditoria de estoque negativo em `backend/tests/integration/company-settings.routes.spec.ts`
+- [X] T093 [P] [US5] Escrever testes de integracao de CRUD/inativacao de usuarios, perfis e bloqueio de acesso direto em `backend/tests/integration/users-authorization.routes.spec.ts`
+- [X] T094 [P] [US5] Escrever testes de configuracoes, upload de logo e auditoria de estoque negativo em `backend/tests/integration/company-settings.routes.spec.ts`
 
 ### Implementacao para User Story 5
 
-- [ ] T095 [US5] Implementar schemas, service e endpoints administrativos de usuarios sem expor hash de senha em `backend/src/validators/user.schemas.ts`, `backend/src/services/user.service.ts`, `backend/src/controllers/user.controller.ts` e `backend/src/routes/user.routes.ts`
-- [ ] T096 [US5] Completar edicao de configuracoes, upload de logo e auditoria de `allowNegativeStock` em `backend/src/validators/company-settings.schemas.ts`, `backend/src/services/company-settings.service.ts`, `backend/src/controllers/company-settings.controller.ts` e `backend/src/routes/company-settings.routes.ts`
-- [ ] T097 [P] [US5] Implementar tela administrativa de usuarios e perfis em `frontend/src/features/users/api/users.api.ts`, `frontend/src/features/users/pages/UsersPage.tsx` e `frontend/src/features/users/components/UserForm.tsx`
-- [ ] T098 [P] [US5] Implementar configuracoes da empresa, logo e opcao protegida de estoque negativo em `frontend/src/features/settings/api/settings.api.ts`, `frontend/src/features/settings/pages/CompanySettingsPage.tsx` e `frontend/src/features/settings/components/CompanySettingsForm.tsx`
-- [ ] T099 [US5] Refinar matriz de permissoes, menus e respostas de acesso negado para os quatro perfis em `frontend/src/app/permissions.ts`, `frontend/src/components/layout/AppSidebar.tsx` e `frontend/src/components/feedback/ForbiddenPage.tsx`
-- [ ] T100 [US5] Executar suite de RBAC/configuracoes e validar PDF com identidade atualizada em `backend/tests/integration/users-authorization.routes.spec.ts`, `backend/tests/integration/company-settings.routes.spec.ts` e `README.md`
+- [X] T095 [US5] Implementar schemas, service e endpoints administrativos de usuarios sem expor hash de senha em `backend/src/validators/user.schemas.ts`, `backend/src/services/user.service.ts`, `backend/src/controllers/user.controller.ts` e `backend/src/routes/user.routes.ts`
+- [X] T096 [US5] Completar edicao de configuracoes, upload de logo e auditoria de `allowNegativeStock` em `backend/src/validators/company-settings.schemas.ts`, `backend/src/services/company-settings.service.ts`, `backend/src/controllers/company-settings.controller.ts` e `backend/src/routes/company-settings.routes.ts`
+- [X] T097 [P] [US5] Implementar tela administrativa de usuarios e perfis em `frontend/src/features/users/api/users.api.ts`, `frontend/src/features/users/pages/UsersPage.tsx` e `frontend/src/features/users/components/UserForm.tsx`
+- [X] T098 [P] [US5] Implementar configuracoes da empresa, logo e opcao protegida de estoque negativo em `frontend/src/features/settings/api/settings.api.ts`, `frontend/src/features/settings/pages/CompanySettingsPage.tsx` e `frontend/src/features/settings/components/CompanySettingsForm.tsx`
+- [X] T099 [US5] Refinar matriz de permissoes, menus e respostas de acesso negado para os quatro perfis em `frontend/src/app/permissions.ts`, `frontend/src/components/layout/AppSidebar.tsx` e `frontend/src/components/feedback/ForbiddenPage.tsx`
+- [X] T100 [US5] Executar suite de RBAC/configuracoes e validar PDF com identidade atualizada em `backend/tests/integration/users-authorization.routes.spec.ts`, `backend/tests/integration/company-settings.routes.spec.ts` e `README.md`
 
 **Checkpoint**: Administrador controla identidade e acessos; perfis operacionais executam apenas as funcoes autorizadas.
 
@@ -218,16 +218,16 @@
 
 **Objetivo**: Endurecer o MVP completo, garantir operacao responsiva e preparar publicacao controlada.
 
-- [ ] T101 [P] Validar e sincronizar contrato OpenAPI com schemas reais e tipos frontend em `specs/001-sistema-orcamentos/contracts/openapi.yaml`, `scripts/validate-openapi.mjs` e `frontend/src/lib/api/schema.d.ts`
-- [ ] T102 [P] Configurar React Testing Library com executor compativel com Vite e implementar testes essenciais da interface em `frontend/vitest.config.ts`, `frontend/src/test/setup.ts`, `frontend/src/features/auth/LoginPage.spec.tsx`, `frontend/src/features/quotes/QuoteForm.spec.tsx`, `frontend/src/features/work-orders/WorkOrderDetailPage.spec.tsx` e `frontend/src/features/dashboard/DashboardPage.spec.tsx`
-- [ ] T103 Executar testes de carga basica para listagens/dashboard e ajustar indices somente com evidencia em `backend/tests/performance/dashboard-load.spec.ts` e `backend/prisma/schema.prisma`
-- [ ] T104 [P] Revisar acessibilidade, mascaras, feedbacks de erro e responsividade das rotas essenciais em `frontend/src/styles/global.css` e `frontend/src/components/feedback/`
-- [ ] T105 [P] Endurecer uploads, logs, CORS, rate limit e politica de segredos para producao em `backend/src/middlewares/security.middleware.ts`, `backend/src/providers/storage/local-storage.provider.ts` e `.env.example`
-- [ ] T106 Criar conteinerizacao e configuracao de execucao inicial do frontend/backend em `backend/Dockerfile`, `frontend/Dockerfile` e `docker-compose.production.yml`
-- [ ] T107 Criar pipeline automatizado de lint, typecheck, migracao de teste e suites Jest em `.github/workflows/ci.yml`
-- [ ] T108 Preparar migracao/seed controlados, backup e checklist de deploy inicial em `backend/prisma/seed.ts` e `docs/deployment.md`
-- [ ] T109 Executar roteiro completo de aceite e registrar resultados do MVP em `specs/001-sistema-orcamentos/quickstart.md` e `docs/acceptance-report.md`
-- [ ] T110 Atualizar documentacao final de operacao, perfis, PDF, estoque e comandos em `README.md` e `docs/user-guide.md`
+- [X] T101 [P] Validar e sincronizar contrato OpenAPI com schemas reais e tipos frontend em `specs/001-sistema-orcamentos/contracts/openapi.yaml`, `scripts/validate-openapi.mjs` e `frontend/src/lib/api/schema.d.ts`
+- [X] T102 [P] Configurar React Testing Library com executor compativel com Vite e implementar testes essenciais da interface em `frontend/vitest.config.ts`, `frontend/src/test/setup.ts`, `frontend/src/features/auth/LoginPage.spec.tsx`, `frontend/src/features/quotes/QuoteForm.spec.tsx`, `frontend/src/features/work-orders/WorkOrderDetailPage.spec.tsx` e `frontend/src/features/dashboard/DashboardPage.spec.tsx`
+- [X] T103 Executar testes de carga basica para listagens/dashboard e ajustar indices somente com evidencia em `backend/tests/performance/dashboard-load.spec.ts` e `backend/prisma/schema.prisma`
+- [X] T104 [P] Revisar acessibilidade, mascaras, feedbacks de erro e responsividade das rotas essenciais em `frontend/src/styles/global.css` e `frontend/src/components/feedback/`
+- [X] T105 [P] Endurecer uploads, logs, CORS, rate limit e politica de segredos para producao em `backend/src/middlewares/security.middleware.ts`, `backend/src/providers/storage/local-storage.provider.ts` e `.env.example`
+- [X] T106 Criar conteinerizacao e configuracao de execucao inicial do frontend/backend em `backend/Dockerfile`, `frontend/Dockerfile` e `docker-compose.production.yml`
+- [X] T107 Criar pipeline automatizado de lint, typecheck, migracao de teste e suites Jest em `.github/workflows/ci.yml`
+- [X] T108 Preparar migracao/seed controlados, backup e checklist de deploy inicial em `backend/prisma/seed.ts` e `docs/deployment.md`
+- [X] T109 Executar roteiro completo de aceite e registrar resultados do MVP em `specs/001-sistema-orcamentos/quickstart.md` e `docs/acceptance-report.md`
+- [X] T110 Atualizar documentacao final de operacao, perfis, PDF, estoque e comandos em `README.md` e `docs/user-guide.md`
 
 **Checkpoint**: Suite e aceite aprovados, artefatos de deploy preparados e MVP pronto para implantacao inicial controlada.
 

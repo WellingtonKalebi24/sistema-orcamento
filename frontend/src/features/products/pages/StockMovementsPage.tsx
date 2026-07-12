@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 
 import type { CatalogProduct, StockMovement } from "../../../lib/api/schema";
+import { stockMovementTypeLabels } from "../../../lib/formatters/labels";
 import { listProducts, listStockMovements } from "../api/products.api";
 import { StockMovementForm } from "../components/StockMovementForm";
 
@@ -26,7 +27,7 @@ export function StockMovementsPage() {
         {movements.map((movement) => (
           <div className="table-row" key={movement.id}>
             <strong>{movement.product?.name ?? movement.productId}</strong>
-            <span>{movement.type}</span>
+            <span>{stockMovementTypeLabels[movement.type]}</span>
             <span>{movement.quantity}</span>
             <span>
               {movement.previousBalance} {"->"} {movement.newBalance}

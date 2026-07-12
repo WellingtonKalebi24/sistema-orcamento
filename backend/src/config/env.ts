@@ -10,6 +10,12 @@ const envSchema = z.object({
   CORS_ORIGIN: z.string().default("http://localhost:5173"),
   LOG_LEVEL: z.string().default("info"),
   UPLOAD_DIR: z.string().default("./backend/uploads"),
+  UPLOAD_MAX_BYTES: z.coerce
+    .number()
+    .int()
+    .positive()
+    .default(8 * 1024 * 1024),
+  REQUEST_BODY_LIMIT: z.string().default("1mb"),
   JWT_PRIVATE_KEY: z.string().min(16).default("dev-only-change-this-secret"),
   JWT_ISSUER: z.string().default("sistema-orcamento"),
   JWT_AUDIENCE: z.string().default("sistema-orcamento-web"),

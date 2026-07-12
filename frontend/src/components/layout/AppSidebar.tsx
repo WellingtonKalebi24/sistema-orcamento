@@ -1,6 +1,7 @@
 import { NavLink } from "react-router-dom";
 
 import { canAccess, permissions } from "../../app/permissions";
+import type { CompanySettings } from "../../lib/api/schema";
 import { useAuthStore } from "../../store/auth.store";
 
 const items = [
@@ -15,18 +16,32 @@ const items = [
   { label: "Estoque", to: "/estoque/movimentos", resource: "stock" },
   { label: "Financeiro", to: "/financeiro", resource: "payments" },
   { label: "Relatorios", to: "/relatorios", resource: "reports" },
+  { label: "Usuarios", to: "/usuarios", resource: "users" },
+  { label: "Empresa", to: "/configuracoes", resource: "settings" },
 ];
 
-export function AppSidebar() {
+export function AppSidebar({
+  settings,
+  logoUrl,
+  open,
+  onNavigate,
+}: {
+  settings?: CompanySettings;
+  logoUrl?: string;
+  open: boolean;
+  onNavigate: () => void;
+}) {
   const role = useAuthStore((state) => state.user?.role);
 
   return (
-    <aside className="sidebar">
+    <aside className={`sidebar${open ? " open" : ""}`}>
       <div className="brand">
-        <span className="brand-mark">SO</span>
+        <span className="brand-mark">
+          {logoUrl ? <img alt="Logo da empresa" src={logoUrl} /> : "SO"}
+        </span>
         <div>
-          <strong>Sistema OS</strong>
-          <p>Gestao de servicos</p>
+          <strong>{settings?.systemName || "Sistema OS"}</strong>
+          <p>{settings?.companyName || "Gestao de servicos"}</p>
         </div>
       </div>
       <nav aria-label="Menu principal">
@@ -37,6 +52,7 @@ export function AppSidebar() {
               className={({ isActive }) => (isActive ? "nav-item active" : "nav-item")}
               key={item.to}
               to={item.to}
+              onClick={onNavigate}
             >
               {item.label}
             </NavLink>
@@ -44,7 +60,7 @@ export function AppSidebar() {
       </nav>
       <div className="sidebar-footer">
         <span className="status-dot" />
-        MVP comercial
+        Sistema online
       </div>
     </aside>
   );

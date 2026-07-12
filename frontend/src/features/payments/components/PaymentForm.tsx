@@ -1,9 +1,20 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
+import { CurrencyInput } from "../../../components/forms/CurrencyInput";
+import { getApiErrorMessage } from "../../../lib/api/errors";
+import type { Quote, WorkOrder } from "../../../lib/api/schema";
+import { formatCurrency } from "../../../lib/formatters/currency";
+import { paymentMethodLabels } from "../../../lib/formatters/labels";
+import { listQuotes } from "../../quotes/api/quotes.api";
+import { listWorkOrders } from "../../work-orders/api/work-orders.api";
 import { createPayment } from "../api/payments.api";
 
+type TargetType = "quoteId" | "workOrderId";
+
 export function PaymentForm({ onDone }: { onDone: () => void }) {
-  const [targetType, setTargetType] = useState<"quoteId" | "workOrderId">("workOrderId");
+  const [targetType, setTargetType] = useState<TargetType>("workOrderId");
+  const [quotes, setQuotes] = useState<Quote[]>([]);
+  const [workOrders, setWorkOrders] = useState<WorkOrder[]>([]);
   const [form, setForm] = useState({
     targetId: "",
     method: "PIX",
@@ -12,63 +23,129 @@ export function PaymentForm({ onDone }: { onDone: () => void }) {
     dueDate: "",
     notes: "",
   });
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    Promise.all([listQuotes(), listWorkOrders()])
+      .then(([quoteData, workOrderData]) => {
+        setQuotes(quoteData);
+        setWorkOrders(workOrderData);
+      })
+      .catch((caught) =>
+        setError(getApiErrorMessage(caught, "Nao foi possivel carregar os documentos.")),
+      );
+  }, []);
+
+  const documents = useMemo(
+    () => (targetType === "quoteId" ? quotes : workOrders),
+    [quotes, targetType, workOrders],
+  );
 
   function update(field: keyof typeof form, value: string) {
     setForm((current) => ({ ...current, [field]: value }));
   }
 
+  function changeTargetType(nextType: TargetType) {
+    setTargetType(nextType);
+    setForm((current) => ({ ...current, targetId: "", amount: "0.00" }));
+  }
+
+  function selectDocument(documentId: string) {
+    const document = documents.find((item) => item.id === documentId);
+    const amount =
+      document && "totalAmount" in document ? document.totalAmount : document?.chargedAmount;
+
+    setForm((current) => ({
+      ...current,
+      targetId: documentId,
+      amount: amount ?? "0.00",
+    }));
+  }
+
   async function submit(event: React.FormEvent) {
     event.preventDefault();
-    await createPayment({
-      [targetType]: form.targetId,
-      method: form.method,
-      amount: form.amount,
-      paidAmount: form.paidAmount,
-      dueDate: form.dueDate || undefined,
-      notes: form.notes,
-    });
-    onDone();
+    setError("");
+    setSuccess("");
+    setSubmitting(true);
+
+    try {
+      await createPayment({
+        [targetType]: form.targetId,
+        method: form.method,
+        amount: form.amount,
+        paidAmount: form.paidAmount,
+        dueDate: form.dueDate || undefined,
+        notes: form.notes,
+      });
+      setForm({
+        targetId: "",
+        method: "PIX",
+        amount: "0.00",
+        paidAmount: "0.00",
+        dueDate: "",
+        notes: "",
+      });
+      setSuccess("Pagamento registrado com sucesso.");
+      onDone();
+    } catch (caught) {
+      setError(getApiErrorMessage(caught, "Nao foi possivel registrar o pagamento."));
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   return (
     <form className="form-grid" onSubmit={submit}>
       <label>
-        Vinculo
+        Tipo de documento
         <select
           value={targetType}
-          onChange={(event) => setTargetType(event.target.value as "quoteId" | "workOrderId")}
+          onChange={(event) => changeTargetType(event.target.value as TargetType)}
         >
           <option value="workOrderId">Ordem de servico</option>
           <option value="quoteId">Orcamento</option>
         </select>
       </label>
       <label>
-        ID do documento
-        <input
+        Documento *
+        <select
           value={form.targetId}
-          onChange={(event) => update("targetId", event.target.value)}
+          onChange={(event) => selectDocument(event.target.value)}
           required
-        />
-      </label>
-      <label>
-        Forma
-        <select value={form.method} onChange={(event) => update("method", event.target.value)}>
-          <option value="DINHEIRO">Dinheiro</option>
-          <option value="PIX">Pix</option>
-          <option value="CARTAO">Cartao</option>
-          <option value="BOLETO">Boleto</option>
-          <option value="TRANSFERENCIA">Transferencia</option>
+        >
+          <option value="">Selecione pelo numero e cliente...</option>
+          {documents.map((document) => (
+            <option key={document.id} value={document.id}>
+              {document.number} - {document.client?.name ?? "Cliente"} -{" "}
+              {formatCurrency(
+                "totalAmount" in document ? document.totalAmount : document.chargedAmount,
+              )}
+            </option>
+          ))}
         </select>
       </label>
       <label>
-        Valor
-        <input value={form.amount} onChange={(event) => update("amount", event.target.value)} />
+        Forma de pagamento
+        <select value={form.method} onChange={(event) => update("method", event.target.value)}>
+          <option value="DINHEIRO">{paymentMethodLabels.DINHEIRO}</option>
+          <option value="PIX">{paymentMethodLabels.PIX}</option>
+          <option value="CARTAO">{paymentMethodLabels.CARTAO}</option>
+          <option value="BOLETO">{paymentMethodLabels.BOLETO}</option>
+          <option value="TRANSFERENCIA">{paymentMethodLabels.TRANSFERENCIA}</option>
+        </select>
       </label>
       <label>
-        Valor pago
-        <input
+        Valor do documento
+        <CurrencyInput disabled value={form.amount} onChange={() => undefined} />
+      </label>
+      <label>
+        Valor recebido *
+        <CurrencyInput
+          required
           value={form.paidAmount}
-          onChange={(event) => update("paidAmount", event.target.value)}
+          onChange={(value) => update("paidAmount", value)}
         />
       </label>
       <label>
@@ -81,10 +158,22 @@ export function PaymentForm({ onDone }: { onDone: () => void }) {
       </label>
       <label className="span-2">
         Observacoes
-        <textarea value={form.notes} onChange={(event) => update("notes", event.target.value)} />
+        <textarea
+          placeholder="Informacoes adicionais sobre o recebimento"
+          value={form.notes}
+          onChange={(event) => update("notes", event.target.value)}
+        />
       </label>
-      <button className="button-primary" type="submit">
-        Registrar pagamento
+      {documents.length === 0 ? (
+        <p className="info-message span-2">
+          Nenhum {targetType === "quoteId" ? "orcamento" : "ordem de servico"} disponivel. Crie o
+          documento antes de registrar o pagamento.
+        </p>
+      ) : null}
+      {error ? <p className="form-error span-2">{error}</p> : null}
+      {success ? <p className="success-message span-2">{success}</p> : null}
+      <button className="button-primary" disabled={submitting || !form.targetId} type="submit">
+        {submitting ? "Registrando..." : "Registrar pagamento"}
       </button>
     </form>
   );

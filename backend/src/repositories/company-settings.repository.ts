@@ -15,4 +15,12 @@ export class CompanySettingsRepository {
       include: { logoAttachment: true },
     });
   }
+
+  update(id: string, data: object) {
+    return this.db.companySettings.update({
+      where: { id },
+      data,
+      include: { logoAttachment: true },
+    });
+  }
 }

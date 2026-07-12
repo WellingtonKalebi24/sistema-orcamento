@@ -10,6 +10,8 @@ export const permissions: Record<string, UserRole[]> = {
   workOrders: ["ADMIN", "ATENDENTE", "TECNICO"],
   payments: ["ADMIN", "FINANCEIRO"],
   reports: ["ADMIN", "FINANCEIRO"],
+  users: ["ADMIN"],
+  settings: ["ADMIN"],
 };
 
 export function canAccess(role: UserRole | undefined, resource: keyof typeof permissions) {

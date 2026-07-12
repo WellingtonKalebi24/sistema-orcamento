@@ -10,7 +10,13 @@ export function validateBody(schema: ZodTypeAny) {
 
 export function validateQuery(schema: ZodTypeAny) {
   return (request: Request, _response: Response, next: NextFunction) => {
-    request.query = schema.parse(request.query) as never;
+    const parsedQuery = schema.parse(request.query);
+
+    Object.defineProperty(request, "query", {
+      configurable: true,
+      enumerable: true,
+      value: parsedQuery,
+    });
     next();
   };
 }

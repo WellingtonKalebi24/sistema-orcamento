@@ -1,10 +1,37 @@
 import { DashboardRepository } from "../repositories/dashboard.repository";
 import type { UserRole } from "../types/domain";
 
-type QuoteLike = { status: string };
-type WorkOrderLike = { status: string; estimatedProfit?: unknown };
-type ProductLike = { stockQuantity: unknown; minimumStock: unknown };
-type PaymentLike = { status: string; paidAmount: unknown };
+type QuoteLike = {
+  id: string;
+  number: string;
+  status: string;
+  totalAmount?: unknown;
+  client?: { name?: string } | null;
+};
+type WorkOrderLike = {
+  id: string;
+  number: string;
+  status: string;
+  chargedAmount?: unknown;
+  totalCost?: unknown;
+  estimatedProfit?: unknown;
+  client?: { name?: string } | null;
+};
+type ProductLike = {
+  id: string;
+  name: string;
+  stockQuantity: unknown;
+  minimumStock: unknown;
+};
+type ClientLike = { id: string; name: string; document?: string };
+type PaymentLike = {
+  id: string;
+  status: string;
+  paidAmount: unknown;
+  amount?: unknown;
+  quoteId?: string | null;
+  workOrderId?: string | null;
+};
 
 function money(value: number) {
   return value.toFixed(2);
@@ -22,7 +49,10 @@ export class DashboardService {
       (total: number, payment: PaymentLike) => total + Number(payment.paidAmount),
       0,
     );
-    const estimatedProfit = workOrders.reduce(
+    const profitWorkOrders = workOrders.filter(
+      (workOrder: WorkOrderLike) => workOrder.status !== "CANCELADA",
+    );
+    const estimatedProfit = profitWorkOrders.reduce(
       (total: number, workOrder: WorkOrderLike) => total + Number(workOrder.estimatedProfit ?? 0),
       0,
     );
@@ -53,6 +83,71 @@ export class DashboardService {
       topProducts: products.slice(0, 5),
       latestQuotes: quotes.slice(0, 5),
       latestWorkOrders: workOrders.slice(0, 5),
+      details: {
+        quotesMonth: quotes.map((quote: QuoteLike) => ({
+          id: quote.id,
+          number: quote.number,
+          client: quote.client?.name ?? "Cliente",
+          status: quote.status,
+          amount: money(Number(quote.totalAmount ?? 0)),
+        })),
+        quotesApproved: quotes
+          .filter((quote: QuoteLike) => quote.status === "APROVADO")
+          .map((quote: QuoteLike) => ({
+            id: quote.id,
+            number: quote.number,
+            client: quote.client?.name ?? "Cliente",
+            status: quote.status,
+            amount: money(Number(quote.totalAmount ?? 0)),
+          })),
+        monthlyRevenue: paidPayments.map((payment: PaymentLike) => ({
+          id: payment.id,
+          documentId: payment.workOrderId ?? payment.quoteId,
+          status: payment.status,
+          paidAmount: money(Number(payment.paidAmount)),
+          amount: money(Number(payment.amount ?? 0)),
+        })),
+        estimatedProfit: profitWorkOrders.map((workOrder: WorkOrderLike) => ({
+          id: workOrder.id,
+          number: workOrder.number,
+          client: workOrder.client?.name ?? "Cliente",
+          status: workOrder.status,
+          chargedAmount: money(Number(workOrder.chargedAmount ?? 0)),
+          totalCost: money(Number(workOrder.totalCost ?? 0)),
+          estimatedProfit: money(Number(workOrder.estimatedProfit ?? 0)),
+        })),
+        openWorkOrders: workOrders
+          .filter((order: WorkOrderLike) => order.status === "ABERTA")
+          .map((order: WorkOrderLike) => ({
+            id: order.id,
+            number: order.number,
+            client: order.client?.name ?? "Cliente",
+            status: order.status,
+          })),
+        inProgressServices: workOrders
+          .filter((order: WorkOrderLike) => order.status === "EM_ANDAMENTO")
+          .map((order: WorkOrderLike) => ({
+            id: order.id,
+            number: order.number,
+            client: order.client?.name ?? "Cliente",
+            status: order.status,
+          })),
+        lowStock: products
+          .filter(
+            (product: ProductLike) => Number(product.stockQuantity) <= Number(product.minimumStock),
+          )
+          .map((product: ProductLike) => ({
+            id: product.id,
+            name: product.name,
+            stockQuantity: String(product.stockQuantity),
+            minimumStock: String(product.minimumStock),
+          })),
+        clients: clients.map((client: ClientLike) => ({
+          id: client.id,
+          name: client.name,
+          document: client.document,
+        })),
+      },
     };
   }
 }

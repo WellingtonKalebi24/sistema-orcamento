@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
+import { getApiErrorMessage } from "../../../lib/api/errors";
 import type { Quote } from "../../../lib/api/schema";
 import { convertQuoteToWorkOrder } from "../../work-orders/api/work-orders.api";
 
@@ -11,6 +12,20 @@ export function CreateWorkOrderAction({ quote }: { quote: Quote }) {
 
   if (quote.status !== "APROVADO") return null;
 
+  if (quote.workOrder) {
+    return (
+      <div className="success-message">
+        <strong>Ordem de servico ja criada</strong>
+        <p>
+          Este orcamento gerou a OS <strong>{quote.workOrder.number}</strong>.
+        </p>
+        <Link className="button-secondary inline-link" to={`/ordens/${quote.workOrder.id}`}>
+          Abrir ordem de servico
+        </Link>
+      </div>
+    );
+  }
+
   async function convert() {
     setLoading(true);
     setError("");
@@ -18,7 +33,7 @@ export function CreateWorkOrderAction({ quote }: { quote: Quote }) {
       const workOrder = await convertQuoteToWorkOrder(quote.id);
       navigate(`/ordens/${workOrder.id}`);
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : "Nao foi possivel gerar a OS.");
+      setError(getApiErrorMessage(caught, "Nao foi possivel gerar a OS."));
     } finally {
       setLoading(false);
     }

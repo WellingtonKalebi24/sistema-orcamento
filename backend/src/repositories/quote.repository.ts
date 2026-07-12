@@ -19,7 +19,7 @@ export class QuoteRepository {
     return Promise.all([
       this.db.quote.findMany({
         where,
-        include: { client: true, items: true },
+        include: { client: true, items: true, workOrder: true },
         orderBy: { createdAt: "desc" },
         skip: (filters.page - 1) * filters.pageSize,
         take: filters.pageSize,
@@ -29,11 +29,17 @@ export class QuoteRepository {
   }
 
   findById(id: string) {
-    return this.db.quote.findUnique({ where: { id }, include: { client: true, items: true } });
+    return this.db.quote.findUnique({
+      where: { id },
+      include: { client: true, items: true, workOrder: true },
+    });
   }
 
   create(data: object) {
-    return this.db.quote.create({ data, include: { client: true, items: true } });
+    return this.db.quote.create({
+      data,
+      include: { client: true, items: true, workOrder: true },
+    });
   }
 
   async replaceDraft(id: string, data: { quote: object; items: object[] }) {
@@ -41,11 +47,15 @@ export class QuoteRepository {
     return this.db.quote.update({
       where: { id },
       data: { ...data.quote, items: { create: data.items } },
-      include: { client: true, items: true },
+      include: { client: true, items: true, workOrder: true },
     });
   }
 
   updateStatus(id: string, data: object) {
-    return this.db.quote.update({ where: { id }, data, include: { client: true, items: true } });
+    return this.db.quote.update({
+      where: { id },
+      data,
+      include: { client: true, items: true, workOrder: true },
+    });
   }
 }

@@ -5,6 +5,7 @@ const prisma = new PrismaClient();
 
 async function main() {
   const passwordHash = await bcrypt.hash("Admin@12345", 12);
+  const defaultPasswordHash = await bcrypt.hash("Usuario@12345", 12);
 
   const admin = await prisma.user.upsert({
     where: { email: "admin@sistema.local" },
@@ -16,6 +17,39 @@ async function main() {
       role: "ADMIN",
     },
   });
+
+  await Promise.all([
+    prisma.user.upsert({
+      where: { email: "atendente@sistema.local" },
+      update: {},
+      create: {
+        name: "Atendente Demo",
+        email: "atendente@sistema.local",
+        passwordHash: defaultPasswordHash,
+        role: "ATENDENTE",
+      },
+    }),
+    prisma.user.upsert({
+      where: { email: "tecnico@sistema.local" },
+      update: {},
+      create: {
+        name: "Tecnico Demo",
+        email: "tecnico@sistema.local",
+        passwordHash: defaultPasswordHash,
+        role: "TECNICO",
+      },
+    }),
+    prisma.user.upsert({
+      where: { email: "financeiro@sistema.local" },
+      update: {},
+      create: {
+        name: "Financeiro Demo",
+        email: "financeiro@sistema.local",
+        passwordHash: defaultPasswordHash,
+        role: "FINANCEIRO",
+      },
+    }),
+  ]);
 
   await prisma.companySettings.upsert({
     where: { id: "00000000-0000-0000-0000-000000000001" },

@@ -1,12 +1,12 @@
 import { z } from "zod";
 
-import { moneySchema, quantitySchema } from "./common.schemas";
+import { moneySchema, quantitySchema, uuidSchema } from "./common.schemas";
 
 const quoteItemSchema = z
   .object({
     type: z.enum(["SERVICE", "PRODUCT"]),
-    productId: z.string().uuid().optional(),
-    serviceId: z.string().uuid().optional(),
+    productId: uuidSchema.optional(),
+    serviceId: uuidSchema.optional(),
     quantity: quantitySchema,
     unitPrice: moneySchema.optional(),
     discountAmount: moneySchema.default("0.00"),
@@ -22,7 +22,7 @@ const quoteItemSchema = z
   );
 
 export const quoteInputSchema = z.object({
-  clientId: z.string().uuid(),
+  clientId: uuidSchema,
   validUntil: z.coerce.date(),
   requestDescription: z.string().trim().min(3),
   items: z.array(quoteItemSchema).min(1),

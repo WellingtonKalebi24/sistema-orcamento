@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 
 import type { Quote } from "../../../lib/api/schema";
 import { formatCurrency } from "../../../lib/formatters/currency";
+import { quoteStatusLabels } from "../../../lib/formatters/labels";
 import { listQuotes } from "../api/quotes.api";
 
 export function QuotesPage() {
@@ -23,7 +24,7 @@ export function QuotesPage() {
           <Link className="table-row" key={quote.id} to={`/orcamentos/${quote.id}`}>
             <span>{quote.number}</span>
             <span>{quote.client?.name}</span>
-            <span>{quote.status}</span>
+            <span>{quoteStatusLabels[quote.status]}</span>
             <strong>{formatCurrency(quote.totalAmount)}</strong>
           </Link>
         ))}

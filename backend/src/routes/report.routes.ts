@@ -10,3 +10,4 @@ export const reportRouter = Router();
 
 reportRouter.use(authenticate, authorize("ADMIN", "FINANCEIRO"));
 reportRouter.get("/", (request, response) => controller.summary(request, response));
+reportRouter.get("/:reportType", (request, response) => controller.summary(request, response));
