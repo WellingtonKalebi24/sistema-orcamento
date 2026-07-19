@@ -32,6 +32,15 @@ if not exist ".env" (
   )
 )
 
+if not exist "backend\.env" (
+  if exist ".env" (
+    copy ".env" "backend\.env" >nul
+  )
+)
+
+set DEMO_MODE=true
+set USE_MEMORY_DB=true
+
 if not exist "node_modules" (
   echo Instalando dependencias. Isso pode demorar alguns minutos na primeira vez...
   call npm install

@@ -1,11 +1,18 @@
-import "dotenv/config";
+import { resolve } from "node:path";
 
+import { config } from "dotenv";
 import { z } from "zod";
+
+config({ path: resolve(process.cwd(), ".env") });
+config({ path: resolve(process.cwd(), "../.env") });
 
 const envSchema = z.object({
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
   PORT: z.coerce.number().int().positive().default(3333),
-  DATABASE_URL: z.string().min(1),
+  DATABASE_URL: z
+    .string()
+    .min(1)
+    .default("postgresql://orcamento:orcamento_local@localhost:5432/orcamento?schema=public"),
   TEST_DATABASE_URL: z.string().optional(),
   CORS_ORIGIN: z.string().default("http://localhost:5173"),
   LOG_LEVEL: z.string().default("info"),

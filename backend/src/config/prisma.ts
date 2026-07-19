@@ -9,6 +9,11 @@ let client: PrismaClient | undefined;
 let fallbackClient: PrismaClient | undefined;
 
 function getClient() {
+  if (process.env.DEMO_MODE === "true" || process.env.USE_MEMORY_DB === "true") {
+    fallbackClient ??= createMemoryPrisma() as PrismaClient;
+    return fallbackClient;
+  }
+
   if (fallbackClient) return fallbackClient;
   try {
     client ??= new PrismaClient();

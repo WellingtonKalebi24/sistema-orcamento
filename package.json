@@ -25,6 +25,7 @@
     "test": "npm run test --workspace backend",
     "validate:openapi": "node scripts/validate-openapi.mjs",
     "generate:api-types": "node scripts/generate-api-types.mjs",
+    "demo:zip": "node scripts/create-demo-zip.mjs",
     "db:up": "docker compose up -d postgres postgres-test",
     "db:down": "docker compose down"
   },
