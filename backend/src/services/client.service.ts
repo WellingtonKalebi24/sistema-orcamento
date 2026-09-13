@@ -1,6 +1,7 @@
 import { ClientRepository } from "../repositories/client.repository";
 import { AppError } from "../utils/app-error";
 import type { ClientInput } from "../validators/client.schemas";
+import { summarizeEquipment } from "./client-equipment-history";
 
 export class ClientService {
   constructor(private readonly clients = new ClientRepository()) {}
@@ -34,7 +35,7 @@ export class ClientService {
   async history(id: string) {
     const client = await this.clients.findHistoryById(id);
     if (!client) throw AppError.notFound("Cliente nao encontrado.");
-    return client;
+    return { ...client, equipmentHistory: summarizeEquipment(client.workOrders) };
   }
 
   async remove(id: string) {

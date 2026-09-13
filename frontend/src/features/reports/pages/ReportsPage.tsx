@@ -43,6 +43,7 @@ export function ReportsPage() {
       </div>
 
       <section className="cards compact-cards">
+        <Link className="card dashboard-card print-hidden" to="/clientes">Relatorio por cliente: equipamentos, manutencoes e retornos</Link>
         <button className="card dashboard-card" type="button" onClick={() => setSection("quotes")}>
           <p>Orcamentos</p>
           <strong>{reports.quotes.length}</strong>

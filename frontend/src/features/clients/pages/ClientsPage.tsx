@@ -55,7 +55,7 @@ export function ClientsPage() {
             <span>{client.whatsapp ?? client.phone ?? "Sem telefone"}</span>
             <div className="row-actions">
               <Link className="button-secondary" to={`/clientes/${client.id}`}>
-                Editar
+                Historico / editar
               </Link>
               <button
                 className="button-danger"

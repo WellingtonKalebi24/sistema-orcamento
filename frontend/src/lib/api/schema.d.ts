@@ -229,6 +229,10 @@ export type WorkOrder = {
   expectedAt?: string;
   completedAt?: string;
   problemDescription: string;
+  equipmentName?: string;
+  equipmentBrand?: string;
+  equipmentModel?: string;
+  equipmentIdentifier?: string;
   executionDescription?: string;
   internalNotes?: string;
   clientNotes?: string;

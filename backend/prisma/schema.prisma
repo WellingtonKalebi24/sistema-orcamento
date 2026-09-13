@@ -255,6 +255,10 @@ model WorkOrder {
   expectedAt           DateTime?
   completedAt          DateTime?
   problemDescription   String
+  equipmentName        String?
+  equipmentBrand       String?
+  equipmentModel       String?
+  equipmentIdentifier  String?
   executionDescription String?
   internalNotes        String?
   clientNotes          String?

@@ -8,6 +8,7 @@ import { AttachmentPanel } from "../components/AttachmentPanel";
 import { ExecutionForm } from "../components/ExecutionForm";
 import { WorkOrderStatusPanel } from "../components/WorkOrderStatusPanel";
 import { getWorkOrder } from "../api/work-orders.api";
+import { EquipmentPanel } from "../components/EquipmentPanel";
 
 export function WorkOrderDetailPage() {
   const { id } = useParams();
@@ -27,6 +28,7 @@ export function WorkOrderDetailPage() {
       </h2>
       <p>{workOrder.client?.name}</p>
       <p>{workOrder.problemDescription}</p>
+      <EquipmentPanel key={workOrder.id} workOrder={workOrder} onChange={setWorkOrder} />
       <div className="panels detail-panels">
         <div className="table-card">
           <strong>Itens executados</strong>

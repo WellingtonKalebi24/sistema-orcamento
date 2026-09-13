@@ -32,8 +32,8 @@ export class ClientRepository {
     return this.db.client.findFirst({
       where: { id, deletedAt: null },
       include: {
-        quotes: { include: { items: true }, orderBy: { createdAt: "desc" }, take: 20 },
-        workOrders: { include: { items: true }, orderBy: { createdAt: "desc" }, take: 20 },
+        quotes: { include: { items: true }, orderBy: { createdAt: "desc" } },
+        workOrders: { include: { items: true }, orderBy: { createdAt: "desc" } },
       },
     });
   }

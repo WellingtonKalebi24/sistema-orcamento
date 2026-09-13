@@ -87,6 +87,10 @@ export class WorkOrderService {
     return this.workOrders.create({
       number,
       clientId: input.clientId,
+      equipmentName: input.equipmentName,
+      equipmentBrand: input.equipmentBrand,
+      equipmentModel: input.equipmentModel,
+      equipmentIdentifier: input.equipmentIdentifier,
       technicianId: input.technicianId,
       expectedAt: input.expectedAt,
       problemDescription: input.problemDescription,
@@ -166,6 +170,10 @@ export class WorkOrderService {
       laborCost: input.laborCost,
       chargedAmount: input.chargedAmount,
       status: input.status,
+      equipmentName: input.equipmentName,
+      equipmentBrand: input.equipmentBrand,
+      equipmentModel: input.equipmentModel,
+      equipmentIdentifier: input.equipmentIdentifier,
       updatedById: userId,
     };
     Object.keys(updateData).forEach(

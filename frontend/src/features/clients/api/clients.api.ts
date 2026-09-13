@@ -1,5 +1,10 @@
 import { api } from "../../../lib/api/client";
-import type { Client } from "../../../lib/api/schema";
+import type { Client, Quote, WorkOrder } from "../../../lib/api/schema";
+
+export type ClientHistory = Client & {
+  quotes: Quote[]; workOrders: WorkOrder[];
+  equipmentHistory: Array<{ identifier: string; name: string; brand: string; model: string; visits: number; completed: number; orderIds: string[] }>;
+};
 
 export async function createClient(input: Partial<Client>) {
   const response = await api.post("/clients", input);
@@ -23,7 +28,7 @@ export async function getClient(id: string) {
 
 export async function getClientHistory(id: string) {
   const response = await api.get(`/clients/${id}/history`);
-  return response.data.data as Client & { quotes?: unknown[]; workOrders?: unknown[] };
+  return response.data.data as ClientHistory;
 }
 
 export async function deleteClient(id: string) {

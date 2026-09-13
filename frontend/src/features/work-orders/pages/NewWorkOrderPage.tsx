@@ -8,6 +8,7 @@ import { itemTypeLabels } from "../../../lib/formatters/labels";
 import { ClientPicker } from "../../clients/components/ClientPicker";
 import { listCatalog, type CatalogResponse } from "../../quotes/api/quotes.api";
 import { createWorkOrder } from "../api/work-orders.api";
+import { EquipmentFields, emptyEquipment } from "../components/EquipmentFields";
 
 type WorkOrderDraftItem = {
   type: "SERVICE" | "PRODUCT";
@@ -28,6 +29,7 @@ export function NewWorkOrderPage() {
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [form, setForm] = useState({
+    ...emptyEquipment,
     expectedAt: "",
     problemDescription: "",
     laborCost: "0.00",
@@ -102,7 +104,10 @@ export function NewWorkOrderPage() {
               <h3>Cliente e prazo</h3>
               <p>Selecione para quem o servico sera executado.</p>
             </div>
-            <ClientPicker value={clientId} onChange={setClientId} />
+            <ClientPicker value={clientId} onChange={(selected) => {
+              setClientId(selected);
+              setForm((current) => ({ ...current, ...emptyEquipment }));
+            }} />
             <label>
               Data prevista
               <input
@@ -122,6 +127,7 @@ export function NewWorkOrderPage() {
             required
           />
         </label>
+        <EquipmentFields clientId={clientId} value={form} onChange={(equipment) => setForm((current) => ({ ...current, ...equipment }))} />
         <fieldset className="catalog-picker span-2">
           <legend>Itens previstos para a OS</legend>
           <div className="form-grid embedded-form-grid">

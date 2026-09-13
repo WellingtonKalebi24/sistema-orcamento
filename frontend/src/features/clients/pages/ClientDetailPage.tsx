@@ -1,42 +1,37 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
-import type { Client } from "../../../lib/api/schema";
-import { getClientHistory, updateClient } from "../api/clients.api";
+import { getApiErrorMessage } from "../../../lib/api/errors";
+import { getClientHistory, updateClient, type ClientHistory } from "../api/clients.api";
+import { ClientHistoryReport } from "../components/ClientHistoryReport";
 import { ClientForm } from "../components/ClientForm";
 
 export function ClientDetailPage() {
   const { id } = useParams();
-  const [client, setClient] = useState<
-    (Client & { quotes?: unknown[]; workOrders?: unknown[] }) | undefined
-  >();
+  const [client, setClient] = useState<ClientHistory>();
+  const [error, setError] = useState("");
 
   useEffect(() => {
-    if (id) getClientHistory(id).then(setClient);
+    let active = true;
+    setClient(undefined); setError("");
+    if (id) getClientHistory(id).then((data) => { if (active) setClient(data); })
+      .catch((caught) => { if (active) setError(getApiErrorMessage(caught, "Nao foi possivel carregar o historico.")); });
+    return () => { active = false; };
   }, [id]);
 
-  if (!client || !id) return <section className="panel">Carregando cliente...</section>;
+  if (!client || !id) return <section className="panel">{error || "Carregando cliente..."}</section>;
 
   return (
     <section className="panel">
       <p className="eyebrow">Cliente</p>
       <h2>{client.name}</h2>
-      <ClientForm
+      <details className="print-hidden"><summary>Editar cadastro do cliente</summary><ClientForm
         client={client}
         onSubmit={async (input) => {
           setClient({ ...client, ...(await updateClient(id, input)) });
         }}
-      />
-      <div className="panels detail-panels">
-        <div className="table-card">
-          <strong>Historico de orcamentos</strong>
-          <p>{client.quotes?.length ?? 0} registro(s)</p>
-        </div>
-        <div className="table-card">
-          <strong>Historico de OS</strong>
-          <p>{client.workOrders?.length ?? 0} registro(s)</p>
-        </div>
-      </div>
+      /></details>
+      <ClientHistoryReport client={client} />
     </section>
   );
 }
