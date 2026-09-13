@@ -5,6 +5,8 @@ COPY frontend/package.json frontend/package.json
 RUN npm ci --include=dev
 
 FROM deps AS build
+ARG VITE_API_URL
+ENV VITE_API_URL=$VITE_API_URL
 COPY frontend frontend
 RUN npm run build --workspace frontend
 
