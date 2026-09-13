@@ -22,6 +22,7 @@ export const authRateLimit = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   skipSuccessfulRequests: true,
+  requestWasSuccessful: (_request, response) => response.statusCode !== 401,
   handler: (_request, response) =>
     response.status(429).json({
       success: false,
@@ -31,6 +32,21 @@ export const authRateLimit = rateLimit({
         details: [],
       },
     }),
+});
+
+export const refreshRateLimit = rateLimit({
+  windowMs: 60 * 1000,
+  limit: 60,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    success: false,
+    error: {
+      code: "TOO_MANY_REQUESTS",
+      message: "Muitas renovacoes de sessao. Aguarde um minuto e entre novamente.",
+      details: [],
+    },
+  },
 });
 
 function expressBodyLimit() {

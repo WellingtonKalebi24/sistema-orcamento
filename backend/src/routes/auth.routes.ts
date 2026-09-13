@@ -2,7 +2,7 @@ import { Router } from "express";
 
 import { AuthController } from "../controllers/auth.controller";
 import { authenticate } from "../middlewares/authenticate.middleware";
-import { authRateLimit } from "../middlewares/security.middleware";
+import { authRateLimit, refreshRateLimit } from "../middlewares/security.middleware";
 import { validateBody } from "../middlewares/validate.middleware";
 import { loginSchema } from "../validators/auth.schemas";
 
@@ -13,7 +13,7 @@ export const authRouter = Router();
 authRouter.post("/login", authRateLimit, validateBody(loginSchema), (request, response) =>
   controller.login(request, response),
 );
-authRouter.post("/refresh", authRateLimit, (request, response) =>
+authRouter.post("/refresh", refreshRateLimit, (request, response) =>
   controller.refresh(request, response),
 );
 authRouter.post("/logout", authenticate, (request, response) =>
