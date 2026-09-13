@@ -1,4 +1,4 @@
-FROM node:24-alpine AS deps
+FROM node:24-bookworm-slim AS deps
 WORKDIR /app
 COPY package*.json ./
 COPY backend/package.json backend/package.json
@@ -9,7 +9,7 @@ FROM deps AS build
 COPY . .
 RUN npm run build --workspace backend
 
-FROM node:24-alpine AS runtime
+FROM node:24-bookworm-slim AS runtime
 WORKDIR /app
 ENV NODE_ENV=production
 COPY package*.json ./

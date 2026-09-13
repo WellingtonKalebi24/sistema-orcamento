@@ -1,4 +1,4 @@
-FROM node:24-alpine AS deps
+FROM node:24-bookworm-slim AS deps
 WORKDIR /app
 COPY package*.json ./
 COPY frontend/package.json frontend/package.json

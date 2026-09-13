@@ -4,15 +4,22 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 async function main() {
-  const passwordHash = await bcrypt.hash("Admin@12345", 12);
+  const adminEmail = process.env.ADMIN_EMAIL ?? "admin@sistema.local";
+  const adminPassword = process.env.ADMIN_PASSWORD ?? "Admin@12345";
+  const passwordHash = await bcrypt.hash(adminPassword, 12);
   const defaultPasswordHash = await bcrypt.hash("Usuario@12345", 12);
 
   const admin = await prisma.user.upsert({
-    where: { email: "admin@sistema.local" },
-    update: {},
+    where: { email: adminEmail },
+    update: {
+      passwordHash,
+      role: "ADMIN",
+      status: "ACTIVE",
+      deletedAt: null,
+    },
     create: {
       name: "Administrador",
-      email: "admin@sistema.local",
+      email: adminEmail,
       passwordHash,
       role: "ADMIN",
     },
