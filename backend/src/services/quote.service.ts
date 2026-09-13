@@ -75,7 +75,7 @@ export class QuoteService {
   ) {
     const quote = await this.findById(id);
     const allowed: Record<string, string[]> = {
-      RASCUNHO: ["ENVIADO"],
+      RASCUNHO: ["ENVIADO", "RECUSADO"],
       ENVIADO: ["APROVADO", "RECUSADO", "EXPIRADO"],
       APROVADO: [],
       RECUSADO: [],
