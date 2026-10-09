@@ -5,7 +5,13 @@ import { onlyDigits } from "../utils/documents";
 export const clientInputSchema = z.object({
   name: z.string().trim().min(2),
   personType: z.enum(["PF", "PJ"]),
-  document: z.string().transform(onlyDigits).pipe(z.string().min(11).max(14)),
+  document: z
+    .string()
+    .transform(onlyDigits)
+    .refine(
+      (value) => value.length === 11 || value.length === 14,
+      "Informe um CPF com 11 digitos ou um CNPJ com 14 digitos.",
+    ),
   phone: z.string().trim().optional(),
   whatsapp: z.string().trim().optional(),
   email: z.string().email().optional().or(z.literal("")),

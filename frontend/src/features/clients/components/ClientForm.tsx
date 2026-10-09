@@ -51,10 +51,15 @@ export function ClientForm({
     event.preventDefault();
     setSaved("");
     setError("");
+    const document = (form.document ?? "").replace(/\D/g, "");
+    if (document.length !== 11 && document.length !== 14) {
+      setError("Informe um CPF com 11 digitos ou um CNPJ com 14 digitos.");
+      return;
+    }
     setSubmitting(true);
 
     try {
-      await onSubmit(form);
+      await onSubmit({ ...form, document });
       setSaved("Cliente salvo com sucesso.");
     } catch (caught) {
       setError(getApiErrorMessage(caught, "Nao foi possivel salvar o cliente."));
@@ -89,7 +94,7 @@ export function ClientForm({
         CPF ou CNPJ *
         <input
           inputMode="numeric"
-          placeholder="Somente numeros ou com mascara"
+          placeholder="CPF: 11 digitos ou CNPJ: 14 digitos"
           value={form.document ?? ""}
           onChange={(event) => update("document", event.target.value)}
           required
