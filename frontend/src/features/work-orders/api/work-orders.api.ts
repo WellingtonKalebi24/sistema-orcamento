@@ -1,4 +1,16 @@
 import { api } from "../../../lib/api/client";
+
+export async function downloadWorkOrderPdf(id: string, number: string) {
+  const response = await api.get(`/work-orders/${id}/pdf`, { responseType: "blob" });
+  const url = URL.createObjectURL(response.data as Blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = `ordem-servico-${number}.pdf`;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  window.setTimeout(() => URL.revokeObjectURL(url), 60_000);
+}
 import type { Attachment, WorkOrder } from "../../../lib/api/schema";
 
 export async function listWorkOrders() {

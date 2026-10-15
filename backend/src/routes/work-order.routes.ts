@@ -4,6 +4,7 @@ import { Router } from "express";
 import { env } from "../config/env";
 import { AttachmentController } from "../controllers/attachment.controller";
 import { WorkOrderController } from "../controllers/work-order.controller";
+import { WorkOrderPdfController } from "../controllers/work-order-pdf.controller";
 import { authenticate } from "../middlewares/authenticate.middleware";
 import { authorize } from "../middlewares/authorize.middleware";
 import { validateBody, validateQuery } from "../middlewares/validate.middleware";
@@ -17,6 +18,7 @@ import {
 } from "../validators/work-order.schemas";
 
 const controller = new WorkOrderController();
+const pdfController = new WorkOrderPdfController();
 const attachmentController = new AttachmentController();
 const upload = multer({
   storage: multer.memoryStorage(),
@@ -36,6 +38,7 @@ workOrderRouter.post(
   (request, response) => controller.create(request, response),
 );
 workOrderRouter.get("/:id", (request, response) => controller.detail(request, response));
+workOrderRouter.get("/:id/pdf", (request, response) => pdfController.download(request, response));
 workOrderRouter.patch(
   "/:id",
   authorize("ADMIN", "ATENDENTE", "TECNICO"),

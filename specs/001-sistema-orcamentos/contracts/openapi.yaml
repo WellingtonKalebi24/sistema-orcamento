@@ -578,6 +578,22 @@ paths:
           description: Ordem atualizada.
         '409':
           $ref: '#/components/responses/Conflict'
+  /work-orders/{id}/pdf:
+    get:
+      tags: [WorkOrders]
+      summary: Baixar formulário PDF da ordem de serviço
+      parameters:
+        - $ref: '#/components/parameters/Id'
+      responses:
+        '200':
+          description: Documento A4 com cliente, equipamento, atendimento, totais e assinatura
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+        '404':
+          description: Ordem de serviço não encontrada.
   /work-orders/{id}/complete:
     post:
       tags: [WorkOrders]

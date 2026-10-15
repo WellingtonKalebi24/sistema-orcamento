@@ -7,12 +7,27 @@ import { workOrderStatusLabels } from "../../../lib/formatters/labels";
 import { AttachmentPanel } from "../components/AttachmentPanel";
 import { ExecutionForm } from "../components/ExecutionForm";
 import { WorkOrderStatusPanel } from "../components/WorkOrderStatusPanel";
-import { getWorkOrder } from "../api/work-orders.api";
+import { downloadWorkOrderPdf, getWorkOrder } from "../api/work-orders.api";
 import { EquipmentPanel } from "../components/EquipmentPanel";
 
 export function WorkOrderDetailPage() {
   const { id } = useParams();
   const [workOrder, setWorkOrder] = useState<WorkOrder>();
+  const [downloading, setDownloading] = useState(false);
+  const [pdfError, setPdfError] = useState("");
+
+  async function downloadPdf() {
+    if (!workOrder) return;
+    setDownloading(true);
+    setPdfError("");
+    try {
+      await downloadWorkOrderPdf(workOrder.id, workOrder.number);
+    } catch {
+      setPdfError("Não foi possível baixar o PDF da ordem de serviço. Tente novamente.");
+    } finally {
+      setDownloading(false);
+    }
+  }
 
   useEffect(() => {
     if (id) getWorkOrder(id).then(setWorkOrder);
@@ -28,6 +43,14 @@ export function WorkOrderDetailPage() {
       </h2>
       <p>{workOrder.client?.name}</p>
       <p>{workOrder.problemDescription}</p>
+      <button type="button" className="button-primary" disabled={downloading} onClick={downloadPdf}>
+        {downloading ? "Gerando PDF..." : "Baixar PDF"}
+      </button>
+      {pdfError ? (
+        <p role="alert" className="form-error">
+          {pdfError}
+        </p>
+      ) : null}
       <EquipmentPanel key={workOrder.id} workOrder={workOrder} onChange={setWorkOrder} />
       <div className="panels detail-panels">
         <div className="table-card">
