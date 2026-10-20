@@ -33,7 +33,11 @@ export class QuotePdfService {
 
     return {
       fileName: `orcamento-${quote.number}.pdf`,
-      buffer: await this.pdf.generate({ ...quote, logoBuffer }),
+      buffer: await this.pdf.generate({
+        ...quote,
+        companySnapshot: quote.companySnapshot ?? currentCompany,
+        logoBuffer,
+      }),
     };
   }
 }
