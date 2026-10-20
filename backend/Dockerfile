@@ -18,6 +18,6 @@ COPY backend/package.json backend/package.json
 RUN npm ci --omit=dev --workspace backend
 COPY --from=build /app/backend/dist backend/dist
 COPY backend/prisma backend/prisma
-RUN npx --yes prisma@5.22.0 generate --schema backend/prisma/schema.prisma
+RUN npm run prisma:generate --workspace backend
 EXPOSE 3333
 CMD ["node", "backend/dist/server.js"]
