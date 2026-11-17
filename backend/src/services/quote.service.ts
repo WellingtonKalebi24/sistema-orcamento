@@ -1,3 +1,4 @@
+import { Prisma } from "@prisma/client";
 import { DocumentSequenceRepository } from "../repositories/document-sequence.repository";
 import { ProductRepository } from "../repositories/product.repository";
 import { QuoteRepository } from "../repositories/quote.repository";
@@ -50,11 +51,15 @@ export class QuoteService {
 
   async updateDraft(id: string, input: QuoteInput, userId: string) {
     const current = await this.findById(id);
-    if (current.status !== "RASCUNHO")
-      throw AppError.conflict("Somente orcamentos em rascunho podem ser editados.");
+    if (current.workOrder || current.payments?.length)
+      throw AppError.conflict("Orcamento com OS ou pagamentos vinculados nao pode ser editado.");
     const prepared = await this.prepare(input);
     return this.quotes.replaceDraft(id, {
       quote: {
+        status: "RASCUNHO",
+        clientSnapshot: Prisma.DbNull,
+        companySnapshot: Prisma.DbNull,
+        snapshotAt: null,
         clientId: input.clientId,
         validUntil: input.validUntil,
         requestDescription: input.requestDescription,
@@ -66,6 +71,13 @@ export class QuoteService {
       },
       items: prepared.items,
     });
+  }
+
+  async remove(id: string, userId: string) {
+    const current = await this.findById(id);
+    if (current.workOrder || current.payments?.length)
+      throw AppError.conflict("Orcamento com OS ou pagamentos vinculados nao pode ser excluido.");
+    return this.quotes.updateStatus(id, { deletedAt: new Date(), updatedById: userId });
   }
 
   async changeStatus(

@@ -1,0 +1,2 @@
+ALTER TABLE "Quote" ADD COLUMN "deletedAt" TIMESTAMP(3);
+ALTER TABLE "WorkOrder" ADD COLUMN "deletedAt" TIMESTAMP(3);

@@ -1,3 +1,4 @@
+import type { Prisma } from "@prisma/client";
 import { prisma } from "../config/prisma";
 import type { UserRole } from "../types/domain";
 
@@ -18,8 +19,8 @@ export class UserRepository {
       ...(filters.search
         ? {
             OR: [
-              { name: { contains: filters.search, mode: "insensitive" } },
-              { email: { contains: filters.search, mode: "insensitive" } },
+              { name: { contains: filters.search, mode: "insensitive" as const } },
+              { email: { contains: filters.search, mode: "insensitive" as const } },
             ],
           }
         : {}),
@@ -27,12 +28,12 @@ export class UserRepository {
 
     return Promise.all([
       this.db.user.findMany({
-        where,
+        where: where as Prisma.UserWhereInput,
         orderBy: { createdAt: "desc" },
         skip: (filters.page - 1) * filters.pageSize,
         take: filters.pageSize,
       }),
-      this.db.user.count({ where }),
+      this.db.user.count({ where: where as Prisma.UserWhereInput }),
     ]);
   }
 

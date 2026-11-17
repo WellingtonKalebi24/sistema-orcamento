@@ -7,7 +7,7 @@ RUN npm ci --include=dev
 
 FROM deps AS build
 COPY . .
-RUN npm run build --workspace backend
+RUN npm run prisma:generate --workspace backend && npm run build --workspace backend
 
 FROM node:24-bookworm-slim AS runtime
 WORKDIR /app

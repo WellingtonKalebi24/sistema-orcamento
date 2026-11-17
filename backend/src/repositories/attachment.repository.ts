@@ -1,3 +1,4 @@
+import type { Prisma } from "@prisma/client";
 import { prisma } from "../config/prisma";
 
 export class AttachmentRepository {
@@ -15,7 +16,7 @@ export class AttachmentRepository {
   }
 
   create(data: object) {
-    return this.db.attachment.create({ data });
+    return this.db.attachment.create({ data: data as Prisma.AttachmentUncheckedCreateInput });
   }
 
   softDelete(id: string) {

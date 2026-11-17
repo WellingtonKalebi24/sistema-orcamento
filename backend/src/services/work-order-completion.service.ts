@@ -19,7 +19,14 @@ export class WorkOrderCompletionService {
       throw AppError.conflict("Ordem de servico cancelada nao pode ser concluida.");
     }
 
-    await this.stock.deductWorkOrderItems(workOrder.items, userId);
+    await this.stock.deductWorkOrderItems(
+      workOrder.items.map((item) => ({
+        ...item,
+        usedQuantity: String(item.usedQuantity),
+        unitCost: String(item.unitCost),
+      })),
+      userId,
+    );
 
     return this.workOrders.update(id, {
       status: "CONCLUIDA",

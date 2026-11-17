@@ -1,3 +1,4 @@
+import type { Prisma } from "@prisma/client";
 import { prisma } from "../config/prisma";
 
 export class PaymentRepository {
@@ -7,13 +8,13 @@ export class PaymentRepository {
     const where = filters.status ? { status: filters.status } : {};
     return Promise.all([
       this.db.payment.findMany({
-        where,
+        where: where as Prisma.PaymentWhereInput,
         include: { quote: true, workOrder: true },
         orderBy: { createdAt: "desc" },
         skip: (filters.page - 1) * filters.pageSize,
         take: filters.pageSize,
       }),
-      this.db.payment.count({ where }),
+      this.db.payment.count({ where: where as Prisma.PaymentWhereInput }),
     ]);
   }
 
@@ -22,7 +23,10 @@ export class PaymentRepository {
   }
 
   create(data: object) {
-    return this.db.payment.create({ data, include: { quote: true, workOrder: true } });
+    return this.db.payment.create({
+      data: data as Prisma.PaymentUncheckedCreateInput,
+      include: { quote: true, workOrder: true },
+    });
   }
 
   update(id: string, data: object) {

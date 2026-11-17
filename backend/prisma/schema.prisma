@@ -185,6 +185,7 @@ model Service {
 }
 
 model Quote {
+  deletedAt DateTime?
   id                 String        @id @default(uuid())
   number             String        @unique
   clientId           String
@@ -246,6 +247,7 @@ model QuoteItem {
 }
 
 model WorkOrder {
+  deletedAt DateTime?
   id                   String            @id @default(uuid())
   number               String            @unique
   clientId             String

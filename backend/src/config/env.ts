@@ -7,6 +7,9 @@ config({ path: resolve(process.cwd(), ".env") });
 config({ path: resolve(process.cwd(), "../.env") });
 
 const envSchema = z.object({
+  WAHA_URL: z.string().default(""),
+  WAHA_API_KEY: z.string().default(""),
+  WAHA_SESSION: z.string().default("default"),
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
   PORT: z.coerce.number().int().positive().default(3333),
   DATABASE_URL: z

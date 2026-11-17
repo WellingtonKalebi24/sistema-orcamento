@@ -1,3 +1,5 @@
+import { z } from "zod";
+import { DocumentWhatsappController } from "../controllers/document-whatsapp.controller";
 import multer from "multer";
 import { Router } from "express";
 
@@ -72,4 +74,15 @@ workOrderRouter.get("/attachments/:id/download", (request, response) =>
 );
 workOrderRouter.delete("/attachments/:id", authorize("ADMIN", "TECNICO"), (request, response) =>
   attachmentController.remove(request, response),
+);
+
+workOrderRouter.delete("/:id", authorize("ADMIN", "ATENDENTE"), (request, response) =>
+  controller.remove(request, response),
+);
+
+workOrderRouter.post(
+  "/:id/whatsapp",
+  authorize("ADMIN", "ATENDENTE"),
+  validateBody(z.object({ phone: z.string().min(8).max(30) })),
+  (request, response) => new DocumentWhatsappController().send("work-order", request, response),
 );

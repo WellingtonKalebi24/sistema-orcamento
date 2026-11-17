@@ -1,3 +1,4 @@
+import type { Prisma } from "@prisma/client";
 import { prisma } from "../config/prisma";
 
 export class ProductRepository {
@@ -11,8 +12,8 @@ export class ProductRepository {
         ...(search
           ? {
               OR: [
-                { name: { contains: search, mode: "insensitive" } },
-                { sku: { contains: search, mode: "insensitive" } },
+                { name: { contains: search, mode: "insensitive" as const } },
+                { sku: { contains: search, mode: "insensitive" as const } },
               ],
             }
           : {}),
@@ -35,21 +36,21 @@ export class ProductRepository {
       ...(filters.search
         ? {
             OR: [
-              { name: { contains: filters.search, mode: "insensitive" } },
-              { sku: { contains: filters.search, mode: "insensitive" } },
-              { category: { contains: filters.search, mode: "insensitive" } },
+              { name: { contains: filters.search, mode: "insensitive" as const } },
+              { sku: { contains: filters.search, mode: "insensitive" as const } },
+              { category: { contains: filters.search, mode: "insensitive" as const } },
             ],
           }
         : {}),
     };
     return Promise.all([
       this.db.product.findMany({
-        where,
+        where: where as Prisma.ProductWhereInput,
         orderBy: { name: "asc" },
         skip: (filters.page - 1) * filters.pageSize,
         take: filters.pageSize,
       }),
-      this.db.product.count({ where }),
+      this.db.product.count({ where: where as Prisma.ProductWhereInput }),
     ]);
   }
 
@@ -62,7 +63,7 @@ export class ProductRepository {
   }
 
   create(data: object) {
-    return this.db.product.create({ data });
+    return this.db.product.create({ data: data as Prisma.ProductUncheckedCreateInput });
   }
 
   updateStock(id: string, stockQuantity: string) {

@@ -1,5 +1,6 @@
+import { DocumentActions } from "../../../components/DocumentActions";
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 
 import type { WorkOrder } from "../../../lib/api/schema";
 import { formatCurrency } from "../../../lib/formatters/currency";
@@ -7,7 +8,7 @@ import { workOrderStatusLabels } from "../../../lib/formatters/labels";
 import { AttachmentPanel } from "../components/AttachmentPanel";
 import { ExecutionForm } from "../components/ExecutionForm";
 import { WorkOrderStatusPanel } from "../components/WorkOrderStatusPanel";
-import { downloadWorkOrderPdf, getWorkOrder } from "../api/work-orders.api";
+import { downloadWorkOrderPdf, printWorkOrderPdf, getWorkOrder } from "../api/work-orders.api";
 import { EquipmentPanel } from "../components/EquipmentPanel";
 
 export function WorkOrderDetailPage() {
@@ -16,12 +17,13 @@ export function WorkOrderDetailPage() {
   const [downloading, setDownloading] = useState(false);
   const [pdfError, setPdfError] = useState("");
 
-  async function downloadPdf() {
+  async function downloadPdf(print = false) {
     if (!workOrder) return;
     setDownloading(true);
     setPdfError("");
     try {
-      await downloadWorkOrderPdf(workOrder.id, workOrder.number);
+      if (print) await printWorkOrderPdf(workOrder.id);
+      else await downloadWorkOrderPdf(workOrder.id, workOrder.number);
     } catch {
       setPdfError("Não foi possível baixar o PDF da ordem de serviço. Tente novamente.");
     } finally {
@@ -43,9 +45,33 @@ export function WorkOrderDetailPage() {
       </h2>
       <p>{workOrder.client?.name}</p>
       <p>{workOrder.problemDescription}</p>
-      <button type="button" className="button-primary" disabled={downloading} onClick={downloadPdf}>
+      <button
+        type="button"
+        className="button-primary"
+        disabled={downloading}
+        onClick={() => void downloadPdf()}
+      >
         {downloading ? "Gerando PDF..." : "Baixar PDF"}
       </button>
+      <button
+        type="button"
+        className="button-secondary"
+        disabled={downloading}
+        onClick={() => void downloadPdf(true)}
+      >
+        Imprimir OS
+      </button>
+      {!["CONCLUIDA", "CANCELADA"].includes(workOrder.status) ? (
+        <Link className="button-secondary inline-link" to={`/ordens/${workOrder.id}/editar`}>
+          Editar OS
+        </Link>
+      ) : null}
+      <DocumentActions
+        kind="work-orders"
+        id={workOrder.id}
+        number={workOrder.number}
+        phone={workOrder.client?.whatsapp || workOrder.client?.phone}
+      />
       {pdfError ? (
         <p role="alert" className="form-error">
           {pdfError}

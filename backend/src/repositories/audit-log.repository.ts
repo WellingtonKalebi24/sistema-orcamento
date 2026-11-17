@@ -1,3 +1,4 @@
+import type { AuditAction } from "@prisma/client";
 import { prisma } from "../config/prisma";
 
 export class AuditLogRepository {
@@ -16,7 +17,7 @@ export class AuditLogRepository {
     return this.db.auditLog.create({
       data: {
         actorId: input.actorId ?? null,
-        action: input.action,
+        action: input.action as AuditAction,
         entityType: input.entityType,
         entityId: input.entityId,
         metadata: input.metadata as object,

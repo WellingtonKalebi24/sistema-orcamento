@@ -14,3 +14,11 @@ Dockerfile*
 backend/uploads/
 backend/storage/
 specs/
+
+# Local recovery material and production backups must never enter an image
+.codex/
+.codex-finalizer/
+backups/
+output/
+outputs/
+tmp/

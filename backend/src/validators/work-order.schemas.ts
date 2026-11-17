@@ -38,7 +38,7 @@ const workOrderItemInputSchema = z
 export const workOrderInputSchema = z.object({
   clientId: uuidSchema,
   technicianId: uuidSchema.optional(),
-  expectedAt: z.coerce.date().optional(),
+  expectedAt: z.coerce.date().nullable().optional(),
   problemDescription: z.string().trim().min(3),
   equipmentName: z.string().trim().max(200).optional(),
   equipmentBrand: z.string().trim().max(100).optional(),
@@ -49,7 +49,7 @@ export const workOrderInputSchema = z.object({
   clientNotes: z.string().trim().optional(),
   laborCost: moneySchema.default("0.00"),
   chargedAmount: moneySchema.default("0.00"),
-  items: z.array(workOrderItemInputSchema).min(1),
+  items: z.array(workOrderItemInputSchema).default([]),
 });
 
 export const workOrderUpdateSchema = workOrderInputSchema
@@ -57,11 +57,14 @@ export const workOrderUpdateSchema = workOrderInputSchema
   .partial()
   .extend({
     status: workOrderEditableStatusSchema.optional(),
+    items: z.array(workOrderItemInputSchema).optional(),
+    laborCost: moneySchema.optional(),
+    chargedAmount: moneySchema.optional(),
   });
 
 export const workOrderConversionSchema = z.object({
   technicianId: uuidSchema.optional(),
-  expectedAt: z.coerce.date().optional(),
+  expectedAt: z.coerce.date().nullable().optional(),
 });
 
 export const workOrderCompletionSchema = z.object({

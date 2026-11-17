@@ -1,3 +1,4 @@
+import { DocumentActions } from "../../../components/DocumentActions";
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 
@@ -51,11 +52,17 @@ export function QuoteDetailPage() {
         ))}
       </div>
       <h3>Total: {formatCurrency(quote.totalAmount)}</h3>
-      {quote.status === "RASCUNHO" ? (
+      {!quote.workOrder ? (
         <Link className="button-secondary inline-link" to={`/orcamentos/${quote.id}/editar`}>
           Editar orcamento
         </Link>
       ) : null}
+      <DocumentActions
+        kind="quotes"
+        id={quote.id}
+        number={quote.number}
+        phone={quote.client?.whatsapp || quote.client?.phone}
+      />
       <QuoteStatusActions quote={quote} onChange={setQuote} />
       <CreateWorkOrderAction quote={quote} />
       {pdfError ? <p className="form-error">{pdfError}</p> : null}

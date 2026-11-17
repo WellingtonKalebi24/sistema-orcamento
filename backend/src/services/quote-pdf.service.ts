@@ -35,7 +35,19 @@ export class QuotePdfService {
       fileName: `orcamento-${quote.number}.pdf`,
       buffer: await this.pdf.generate({
         ...quote,
-        companySnapshot: quote.companySnapshot ?? currentCompany,
+        itemsSubtotal: String(quote.itemsSubtotal),
+        laborAmount: String(quote.laborAmount),
+        travelFee: String(quote.travelFee),
+        totalDiscount: String(quote.totalDiscount),
+        totalAmount: String(quote.totalAmount),
+        clientSnapshot: quote.clientSnapshot as Record<string, unknown> | null,
+        items: quote.items.map((item) => ({
+          ...item,
+          quantity: String(item.quantity),
+          unitPrice: String(item.unitPrice),
+          total: String(item.total),
+        })),
+        companySnapshot: (quote.companySnapshot ?? currentCompany) as Record<string, unknown>,
         logoBuffer,
       }),
     };

@@ -117,7 +117,7 @@ export class WorkOrderService {
     }
     await this.ensureTechnician(input.technicianId);
 
-    const items = (quote.items as QuoteItemRecord[]).map((item) => ({
+    const items = (quote.items as unknown as QuoteItemRecord[]).map((item) => ({
       type: item.type,
       productId: item.productId ?? undefined,
       serviceId: item.serviceId ?? undefined,
@@ -157,6 +157,8 @@ export class WorkOrderService {
     if (current.status === "CANCELADA") {
       throw AppError.conflict("Ordem de servico cancelada nao pode ser editada livremente.");
     }
+    if (current.payments?.length)
+      throw AppError.conflict("OS com pagamentos vinculados nao pode ser editada.");
     if (input.status) this.ensureTransition(current.status, input.status);
     await this.ensureTechnician(input.technicianId);
 
@@ -192,8 +194,22 @@ export class WorkOrderService {
       });
     }
 
-    const updated = await this.workOrders.update(id, updateData);
-    return items ? this.workOrders.replaceItems(updated.id, items) : updated;
+    return items
+      ? this.workOrders.replaceItems(id, items, updateData)
+      : this.workOrders.update(id, updateData);
+  }
+
+  async remove(id: string, userId: string) {
+    const current = await this.findById(id);
+    if (current.status === "CONCLUIDA" || current.stockDeductedAt || current.payments?.length)
+      throw AppError.conflict(
+        "OS concluida, com baixa de estoque ou pagamentos nao pode ser excluida.",
+      );
+    return this.workOrders.update(id, {
+      deletedAt: new Date(),
+      status: "CANCELADA",
+      updatedById: userId,
+    });
   }
 
   private ensureTransition(from: WorkOrderStatus, to: WorkOrderStatus) {

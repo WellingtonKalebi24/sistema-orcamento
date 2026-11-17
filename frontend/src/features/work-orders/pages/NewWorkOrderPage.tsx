@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 
 import { CurrencyInput } from "../../../components/forms/CurrencyInput";
 import { getApiErrorMessage } from "../../../lib/api/errors";
@@ -7,7 +7,7 @@ import { formatCurrency } from "../../../lib/formatters/currency";
 import { itemTypeLabels } from "../../../lib/formatters/labels";
 import { ClientPicker } from "../../clients/components/ClientPicker";
 import { listCatalog, type CatalogResponse } from "../../quotes/api/quotes.api";
-import { createWorkOrder } from "../api/work-orders.api";
+import { createWorkOrder, getWorkOrder, updateWorkOrder } from "../api/work-orders.api";
 import { EquipmentFields, emptyEquipment } from "../components/EquipmentFields";
 
 type WorkOrderDraftItem = {
@@ -16,10 +16,15 @@ type WorkOrderDraftItem = {
   serviceId?: string;
   plannedQuantity: string;
   label: string;
+  usedQuantity?: string;
+  unitPrice?: string;
+  unitCost?: string;
 };
 
 export function NewWorkOrderPage() {
   const navigate = useNavigate();
+  const { id } = useParams();
+  const [loaded, setLoaded] = useState(!id);
   const [catalog, setCatalog] = useState<CatalogResponse>({ products: [], services: [] });
   const [clientId, setClientId] = useState("");
   const [items, setItems] = useState<WorkOrderDraftItem[]>([]);
@@ -34,6 +39,9 @@ export function NewWorkOrderPage() {
     problemDescription: "",
     laborCost: "0.00",
     chargedAmount: "0.00",
+    executionDescription: "",
+    clientNotes: "",
+    internalNotes: "",
   });
 
   useEffect(() => {
@@ -41,6 +49,34 @@ export function NewWorkOrderPage() {
       .then(setCatalog)
       .catch(() => setCatalog({ products: [], services: [] }));
   }, []);
+
+  useEffect(() => {
+    if (!id) return;
+    getWorkOrder(id)
+      .then((order) => {
+        if (["CONCLUIDA", "CANCELADA"].includes(order.status)) {
+          navigate(`/ordens/${id}`);
+          return;
+        }
+        setClientId(order.clientId);
+        setForm({
+          equipmentName: order.equipmentName ?? "",
+          equipmentBrand: order.equipmentBrand ?? "",
+          equipmentModel: order.equipmentModel ?? "",
+          equipmentIdentifier: order.equipmentIdentifier ?? "",
+          expectedAt: order.expectedAt?.slice(0, 10) ?? "",
+          problemDescription: order.problemDescription,
+          laborCost: String(order.laborCost ?? "0.00"),
+          chargedAmount: String(order.chargedAmount),
+          executionDescription: order.executionDescription ?? "",
+          clientNotes: order.clientNotes ?? "",
+          internalNotes: order.internalNotes ?? "",
+        });
+        setItems((order.items ?? []).map((item) => ({ ...item, label: item.descriptionSnapshot })));
+        setLoaded(true);
+      })
+      .catch((caught) => setError(getApiErrorMessage(caught, "Nao foi possivel carregar a OS.")));
+  }, [id, navigate]);
 
   function update(field: keyof typeof form, value: string) {
     setForm((current) => ({ ...current, [field]: value }));
@@ -52,12 +88,13 @@ export function NewWorkOrderPage() {
     setSubmitting(true);
 
     try {
-      const workOrder = await createWorkOrder({
+      const input = {
         ...form,
         clientId,
-        expectedAt: form.expectedAt || undefined,
+        expectedAt: form.expectedAt || (id ? null : undefined),
         items,
-      });
+      };
+      const workOrder = id ? await updateWorkOrder(id, input) : await createWorkOrder(input);
       navigate(`/ordens/${workOrder.id}`);
     } catch (caught) {
       setError(getApiErrorMessage(caught, "Nao foi possivel criar a ordem de servico."));
@@ -87,15 +124,13 @@ export function NewWorkOrderPage() {
 
   return (
     <section className="panel">
-      <p className="eyebrow">Nova OS</p>
-      <h2>Criar ordem de servico manual</h2>
-      <div className="info-message flow-hint">
-        <strong>Fluxo recomendado:</strong> crie um orcamento, marque como aprovado e use o botao
-        “Gerar ordem de servico”. Use esta tela somente quando nao houver orcamento previo.
-        <Link className="button-link" to="/orcamentos/novo">
-          Criar orcamento
-        </Link>
-      </div>
+      <p className="eyebrow">Ordem de servico</p>
+      <h2>{id ? "Editar OS" : "Criar OS diretamente"}</h2>
+      <p>
+        Cadastre o cliente ou a empresa destinataria e os dados do equipamento. Os itens podem ser
+        preenchidos depois.
+      </p>
+      {!loaded && !error ? <p>Carregando...</p> : null}
       <form className="form-grid" onSubmit={submit}>
         <section className="form-step span-2">
           <div className="step-number">1</div>
@@ -104,10 +139,15 @@ export function NewWorkOrderPage() {
               <h3>Cliente e prazo</h3>
               <p>Selecione para quem o servico sera executado.</p>
             </div>
-            <ClientPicker value={clientId} onChange={(selected) => {
-              setClientId(selected);
-              setForm((current) => ({ ...current, ...emptyEquipment }));
-            }} />
+            <fieldset disabled={Boolean(id)}>
+              <ClientPicker
+                value={clientId}
+                onChange={(selected) => {
+                  setClientId(selected);
+                  setForm((current) => ({ ...current, ...emptyEquipment }));
+                }}
+              />
+            </fieldset>
             <label>
               Data prevista
               <input
@@ -127,7 +167,11 @@ export function NewWorkOrderPage() {
             required
           />
         </label>
-        <EquipmentFields clientId={clientId} value={form} onChange={(equipment) => setForm((current) => ({ ...current, ...equipment }))} />
+        <EquipmentFields
+          clientId={clientId}
+          value={form}
+          onChange={(equipment) => setForm((current) => ({ ...current, ...equipment }))}
+        />
         <fieldset className="catalog-picker span-2">
           <legend>Itens previstos para a OS</legend>
           <div className="form-grid embedded-form-grid">
@@ -205,13 +249,25 @@ export function NewWorkOrderPage() {
             onChange={(value) => update("chargedAmount", value)}
           />
         </label>
+        {(
+          [
+            ["executionDescription", "Observacoes do servico"],
+            ["clientNotes", "Observacoes do recebimento"],
+            ["internalNotes", "Informacoes do tecnico"],
+          ] as const
+        ).map(([field, label]) => (
+          <label key={field}>
+            {label}
+            <textarea value={form[field]} onChange={(event) => update(field, event.target.value)} />
+          </label>
+        ))}
         {error ? <p className="form-error span-2">{error}</p> : null}
         <button
           className="button-primary"
-          disabled={!clientId || items.length === 0 || submitting}
+          disabled={!loaded || !clientId || submitting}
           type="submit"
         >
-          {submitting ? "Criando..." : "Criar OS"}
+          {submitting ? "Salvando..." : id ? "Salvar alteracoes" : "Criar OS"}
         </button>
       </form>
     </section>

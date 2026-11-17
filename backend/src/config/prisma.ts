@@ -10,15 +10,16 @@ let fallbackClient: PrismaClient | undefined;
 
 function getClient() {
   if (process.env.DEMO_MODE === "true" || process.env.USE_MEMORY_DB === "true") {
-    fallbackClient ??= createMemoryPrisma() as PrismaClient;
+    fallbackClient ??= createMemoryPrisma() as unknown as PrismaClient;
     return fallbackClient;
   }
 
   if (fallbackClient) return fallbackClient;
   try {
     client ??= new PrismaClient();
-  } catch {
-    fallbackClient = createMemoryPrisma() as PrismaClient;
+  } catch (error) {
+    if (process.env.NODE_ENV === "production") throw error;
+    fallbackClient = createMemoryPrisma() as unknown as PrismaClient;
     return fallbackClient;
   }
   return client;
@@ -209,6 +210,7 @@ function createMemoryPrisma() {
   const attachQuoteRelations = (quote: any) => ({
     ...quote,
     client: clients.find((client) => client.id === quote.clientId),
+    payments: payments.filter((payment) => payment.quoteId === quote.id),
     items: quoteItems.filter((item) => item.quoteId === quote.id),
     workOrder: workOrders.find((workOrder) => workOrder.quoteId === quote.id) ?? null,
   });
@@ -218,6 +220,7 @@ function createMemoryPrisma() {
     client: clients.find((client) => client.id === workOrder.clientId),
     technician: users.find((user) => user.id === workOrder.technicianId) ?? null,
     quote: workOrder.quoteId ? quotes.find((quote) => quote.id === workOrder.quoteId) : null,
+    payments: payments.filter((payment) => payment.workOrderId === workOrder.id),
     items: workOrderItems.filter((item) => item.workOrderId === workOrder.id),
     attachments: attachments.filter(
       (attachment) => attachment.workOrderId === workOrder.id && attachment.deletedAt === null,
@@ -226,9 +229,11 @@ function createMemoryPrisma() {
 
   const attachClientRelations = (client: any) => ({
     ...client,
-    quotes: quotes.filter((quote) => quote.clientId === client.id).map(attachQuoteRelations),
+    quotes: quotes
+      .filter((quote) => quote.clientId === client.id && !quote.deletedAt)
+      .map(attachQuoteRelations),
     workOrders: workOrders
-      .filter((workOrder) => workOrder.clientId === client.id)
+      .filter((workOrder) => workOrder.clientId === client.id && !workOrder.deletedAt)
       .map(attachWorkOrderRelations),
   });
 
@@ -512,14 +517,17 @@ function createMemoryPrisma() {
         quotes
           .filter(
             (quote) =>
+              !quote.deletedAt &&
               (!where?.status || quote.status === where.status) &&
               matchesSearch(quote.number, where?.OR?.[0]?.number?.contains),
           )
           .slice(skip, skip + take)
           .map(attachQuoteRelations),
-      count: async () => quotes.length,
+      count: async () => quotes.filter((quote) => !quote.deletedAt).length,
       findUnique: async ({ where }: any) => {
-        const quote = quotes.find((quote) => quote.id === where.id);
+        const quote = quotes.find(
+          (quote) => quote.id === where.id && (where.deletedAt === undefined || !quote.deletedAt),
+        );
         return quote ? attachQuoteRelations(quote) : null;
       },
       create: async ({ data }: any) => {
@@ -545,7 +553,9 @@ function createMemoryPrisma() {
         return saveResult(attachQuoteRelations(quote));
       },
       update: async ({ where, data }: any) => {
-        const quote = quotes.find((quote) => quote.id === where.id);
+        const quote = quotes.find(
+          (quote) => quote.id === where.id && (where.deletedAt === undefined || !quote.deletedAt),
+        );
         if (data.items?.create) {
           data.items.create.forEach((item: any) =>
             quoteItems.push({
@@ -581,6 +591,7 @@ function createMemoryPrisma() {
         return workOrders
           .filter(
             (workOrder) =>
+              !workOrder.deletedAt &&
               (!where?.status || workOrder.status === where.status) &&
               (matchesSearch(workOrder.number, search) ||
                 matchesSearch(workOrder.problemDescription, search) ||
@@ -593,10 +604,15 @@ function createMemoryPrisma() {
           .map(attachWorkOrderRelations);
       },
       count: async ({ where }: any = {}) =>
-        workOrders.filter((workOrder) => !where?.status || workOrder.status === where.status)
-          .length,
+        workOrders.filter(
+          (workOrder) =>
+            !workOrder.deletedAt && (!where?.status || workOrder.status === where.status),
+        ).length,
       findUnique: async ({ where }: any) => {
-        const workOrder = workOrders.find((record) => record.id === where.id);
+        const workOrder = workOrders.find(
+          (record) =>
+            record.id === where.id && (where.deletedAt === undefined || !record.deletedAt),
+        );
         return workOrder ? attachWorkOrderRelations(workOrder) : null;
       },
       findFirst: async ({ where }: any) =>

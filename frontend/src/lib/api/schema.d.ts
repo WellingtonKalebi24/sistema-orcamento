@@ -94,6 +94,7 @@ export type WorkOrderItem = {
   descriptionSnapshot: string;
   plannedQuantity: string;
   usedQuantity: string;
+  unitCost?: string;
   unitPrice: string;
   totalPrice: string;
   totalCost: string;
@@ -236,6 +237,7 @@ export type WorkOrder = {
   executionDescription?: string;
   internalNotes?: string;
   clientNotes?: string;
+  laborCost?: string;
   chargedAmount: string;
   totalCost: string;
   estimatedProfit: string;

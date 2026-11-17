@@ -1,3 +1,4 @@
+import type { Prisma } from "@prisma/client";
 import { prisma } from "../config/prisma";
 
 export class ClientRepository {
@@ -8,19 +9,19 @@ export class ClientRepository {
       ? {
           deletedAt: null,
           OR: [
-            { name: { contains: filters.search, mode: "insensitive" } },
+            { name: { contains: filters.search, mode: "insensitive" as const } },
             { document: { contains: filters.search } },
           ],
         }
       : { deletedAt: null };
     return Promise.all([
       this.db.client.findMany({
-        where,
+        where: where as Prisma.ClientWhereInput,
         orderBy: { createdAt: "desc" },
         skip: (filters.page - 1) * filters.pageSize,
         take: filters.pageSize,
       }),
-      this.db.client.count({ where }),
+      this.db.client.count({ where: where as Prisma.ClientWhereInput }),
     ]);
   }
 
@@ -32,8 +33,16 @@ export class ClientRepository {
     return this.db.client.findFirst({
       where: { id, deletedAt: null },
       include: {
-        quotes: { include: { items: true }, orderBy: { createdAt: "desc" } },
-        workOrders: { include: { items: true }, orderBy: { createdAt: "desc" } },
+        quotes: {
+          where: { deletedAt: null },
+          include: { items: true },
+          orderBy: { createdAt: "desc" },
+        },
+        workOrders: {
+          where: { deletedAt: null },
+          include: { items: true },
+          orderBy: { createdAt: "desc" },
+        },
       },
     });
   }
@@ -43,7 +52,7 @@ export class ClientRepository {
   }
 
   create(data: object) {
-    return this.db.client.create({ data });
+    return this.db.client.create({ data: data as Prisma.ClientUncheckedCreateInput });
   }
 
   update(id: string, data: object) {

@@ -1,3 +1,4 @@
+import type { Prisma } from "@prisma/client";
 import { prisma } from "../config/prisma";
 
 export class StockMovementRepository {
@@ -8,20 +9,20 @@ export class StockMovementRepository {
   }
 
   create(data: object) {
-    return this.db.stockMovement.create({ data });
+    return this.db.stockMovement.create({ data: data as Prisma.StockMovementUncheckedCreateInput });
   }
 
   list(filters: { page: number; pageSize: number; productId?: string }) {
     const where = filters.productId ? { productId: filters.productId } : {};
     return Promise.all([
       this.db.stockMovement.findMany({
-        where,
+        where: where as Prisma.StockMovementWhereInput,
         include: { product: true },
         orderBy: { createdAt: "desc" },
         skip: (filters.page - 1) * filters.pageSize,
         take: filters.pageSize,
       }),
-      this.db.stockMovement.count({ where }),
+      this.db.stockMovement.count({ where: where as Prisma.StockMovementWhereInput }),
     ]);
   }
 

@@ -5,8 +5,14 @@ export class DashboardRepository {
 
   async summary() {
     const [quotes, workOrders, products, clients, payments] = await Promise.all([
-      this.db.quote.findMany({ include: { client: true, items: true } }),
-      this.db.workOrder.findMany({ include: { client: true, items: true } }),
+      this.db.quote.findMany({
+        where: { deletedAt: null },
+        include: { client: true, items: true },
+      }),
+      this.db.workOrder.findMany({
+        where: { deletedAt: null },
+        include: { client: true, items: true },
+      }),
       this.db.product.findMany({ where: { deletedAt: null } }),
       this.db.client.findMany({ where: { deletedAt: null } }),
       this.db.payment.findMany({}),

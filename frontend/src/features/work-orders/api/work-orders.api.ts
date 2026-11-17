@@ -61,3 +61,18 @@ export async function uploadAttachment(workOrderId: string, file: File, type: At
 export function attachmentDownloadUrl(id: string) {
   return `${import.meta.env.VITE_API_URL ?? "http://localhost:3333/api/v1"}/work-orders/attachments/${id}/download`;
 }
+
+export async function printWorkOrderPdf(id: string) {
+  const printWindow = window.open("", "_blank");
+  if (!printWindow) throw new Error("Permita janelas de impressao no navegador.");
+  try {
+    const response = await api.get(`/work-orders/${id}/pdf`, { responseType: "blob" });
+    const url = URL.createObjectURL(response.data as Blob);
+    printWindow.onload = () => printWindow.print();
+    printWindow.location.href = url;
+    window.setTimeout(() => URL.revokeObjectURL(url), 60_000);
+  } catch (error) {
+    printWindow.close();
+    throw error;
+  }
+}

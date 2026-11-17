@@ -15,12 +15,13 @@ export function EditQuotePage() {
 
   if (!id) return <Navigate replace to="/orcamentos" />;
   if (!quote) return <section className="panel">Carregando orcamento...</section>;
-  if (quote.status !== "RASCUNHO") return <Navigate replace to={`/orcamentos/${quote.id}`} />;
+  if (quote.workOrder) return <Navigate replace to={`/orcamentos/${quote.id}`} />;
 
   return (
     <section className="panel">
       <p className="eyebrow">Orcamentos</p>
       <h2>Editar {quote.number}</h2>
+      <p>Ao salvar, o orcamento volta para rascunho para uma nova aprovacao.</p>
       <QuoteForm quote={quote} />
     </section>
   );

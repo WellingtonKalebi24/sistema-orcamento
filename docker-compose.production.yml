@@ -23,6 +23,9 @@ services:
       CORS_ORIGIN: ${CORS_ORIGIN}
       JWT_PRIVATE_KEY: ${JWT_PRIVATE_KEY}
       COOKIE_SECRET: ${COOKIE_SECRET}
+      WAHA_URL: ${WAHA_URL:-}
+      WAHA_API_KEY: ${WAHA_API_KEY:-}
+      WAHA_SESSION: ${WAHA_SESSION:-default}
       UPLOAD_DIR: /app/uploads
     volumes:
       - uploads:/app/uploads

@@ -44,6 +44,7 @@ export function AppRoutes() {
           <Route path="/orcamentos/:id" element={<QuoteDetailPage />} />
           <Route path="/ordens" element={<WorkOrdersPage />} />
           <Route path="/ordens/nova" element={<NewWorkOrderPage />} />
+          <Route path="/ordens/:id/editar" element={<NewWorkOrderPage />} />
           <Route path="/ordens/:id" element={<WorkOrderDetailPage />} />
           <Route path="/servicos" element={<ServicesPage />} />
           <Route path="/produtos" element={<ProductsPage />} />

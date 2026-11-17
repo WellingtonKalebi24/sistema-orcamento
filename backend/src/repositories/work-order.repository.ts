@@ -1,3 +1,4 @@
+import type { Prisma } from "@prisma/client";
 import { prisma } from "../config/prisma";
 
 export class WorkOrderRepository {
@@ -5,13 +6,14 @@ export class WorkOrderRepository {
 
   list(filters: { page: number; pageSize: number; search?: string; status?: string }) {
     const where = {
+      deletedAt: null,
       ...(filters.status ? { status: filters.status } : {}),
       ...(filters.search
         ? {
             OR: [
-              { number: { contains: filters.search, mode: "insensitive" } },
-              { client: { name: { contains: filters.search, mode: "insensitive" } } },
-              { problemDescription: { contains: filters.search, mode: "insensitive" } },
+              { number: { contains: filters.search, mode: "insensitive" as const } },
+              { client: { name: { contains: filters.search, mode: "insensitive" as const } } },
+              { problemDescription: { contains: filters.search, mode: "insensitive" as const } },
             ],
           }
         : {}),
@@ -19,7 +21,7 @@ export class WorkOrderRepository {
 
     return Promise.all([
       this.db.workOrder.findMany({
-        where,
+        where: where as Prisma.WorkOrderWhereInput,
         include: {
           client: true,
           technician: true,
@@ -31,15 +33,16 @@ export class WorkOrderRepository {
         skip: (filters.page - 1) * filters.pageSize,
         take: filters.pageSize,
       }),
-      this.db.workOrder.count({ where }),
+      this.db.workOrder.count({ where: where as Prisma.WorkOrderWhereInput }),
     ]);
   }
 
   findById(id: string) {
     return this.db.workOrder.findUnique({
-      where: { id },
+      where: { id, deletedAt: null },
       include: {
         client: true,
+        payments: true,
         technician: true,
         quote: true,
         items: true,
@@ -54,9 +57,10 @@ export class WorkOrderRepository {
 
   create(data: object) {
     return this.db.workOrder.create({
-      data,
+      data: data as Prisma.WorkOrderUncheckedCreateInput,
       include: {
         client: true,
+        payments: true,
         technician: true,
         quote: true,
         items: true,
@@ -67,10 +71,17 @@ export class WorkOrderRepository {
 
   update(id: string, data: object) {
     return this.db.workOrder.update({
-      where: { id },
+      where: {
+        id,
+        deletedAt: null,
+        ...("deletedAt" in data
+          ? { status: { not: "CONCLUIDA" as const }, stockDeductedAt: null, payments: { none: {} } }
+          : {}),
+      },
       data,
       include: {
         client: true,
+        payments: true,
         technician: true,
         quote: true,
         items: true,
@@ -79,18 +90,30 @@ export class WorkOrderRepository {
     });
   }
 
-  async replaceItems(id: string, items: object[]) {
-    await this.db.workOrderItem.deleteMany({ where: { workOrderId: id } });
-    return this.db.workOrder.update({
-      where: { id },
-      data: { items: { create: items } },
-      include: {
-        client: true,
-        technician: true,
-        quote: true,
-        items: true,
-        attachments: { where: { deletedAt: null } },
-      },
+  async replaceItems(id: string, items: object[], data: object = {}) {
+    return this.db.$transaction(async (tx) => {
+      await tx.workOrderItem.deleteMany({ where: { workOrderId: id } });
+      return tx.workOrder.update({
+        where: {
+          id,
+          deletedAt: null,
+          status: { notIn: ["CONCLUIDA", "CANCELADA"] },
+          stockDeductedAt: null,
+          payments: { none: {} },
+        },
+        data: {
+          ...data,
+          items: { create: items as Prisma.WorkOrderItemUncheckedCreateWithoutWorkOrderInput[] },
+        },
+        include: {
+          client: true,
+          payments: true,
+          technician: true,
+          quote: true,
+          items: true,
+          attachments: { where: { deletedAt: null } },
+        },
+      });
     });
   }
 }

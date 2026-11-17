@@ -14,6 +14,11 @@ export class QuoteController {
     return created(response, await service.create(request.body, request.user!.id));
   }
 
+  async remove(request: Request, response: Response) {
+    await service.remove(String(request.params.id), request.user!.id);
+    return response.status(204).send();
+  }
+
   async detail(request: Request, response: Response) {
     return ok(response, await service.findById(String(request.params.id)));
   }
