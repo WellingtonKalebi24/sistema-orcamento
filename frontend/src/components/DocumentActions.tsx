@@ -34,24 +34,6 @@ export function DocumentActions({
       setBusy(false);
     }
   }
-  async function sendPdf() {
-    if (!window.confirm(`Enviar o PDF ${number} pelo WhatsApp para ${recipient}?`)) return;
-    setBusy(true);
-    setMessage("");
-    try {
-      await api.post(`/${kind}/${id}/whatsapp`, { phone: recipient }, { timeout: 45_000 });
-      setMessage("PDF enviado pelo WAHA.");
-    } catch (error) {
-      setMessage(
-        getApiErrorMessage(
-          error,
-          "Nao foi possivel confirmar o envio. Confira a conversa antes de tentar novamente.",
-        ),
-      );
-    } finally {
-      setBusy(false);
-    }
-  }
   function whatsapp() {
     let digits = recipient.replace(/\D/g, "");
     if (!recipient.trim().startsWith("+") && (digits.length === 10 || digits.length === 11))
@@ -92,16 +74,6 @@ export function DocumentActions({
       <button className="button-secondary" type="button" onClick={whatsapp}>
         Abrir WhatsApp
       </button>
-      {canManage ? (
-        <button
-          className="button-primary"
-          type="button"
-          disabled={busy}
-          onClick={() => void sendPdf()}
-        >
-          {busy ? "Aguarde..." : "Enviar PDF pelo WAHA"}
-        </button>
-      ) : null}
       {message ? <p role="status">{message}</p> : null}
     </div>
   );

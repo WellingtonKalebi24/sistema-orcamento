@@ -4,13 +4,6 @@ import {
   workOrderInputSchema,
   workOrderUpdateSchema,
 } from "../../../src/validators/work-order.schemas";
-import {
-  DocumentWhatsappService,
-  normalizeWhatsapp,
-} from "../../../src/services/document-whatsapp.service";
-import { QuotePdfService } from "../../../src/services/quote-pdf.service";
-import { env } from "../../../src/config/env";
-
 describe("Gerenciamento de documentos", () => {
   it("edicao parcial do equipamento preserva itens e valores omitidos", () => {
     const parsed = workOrderUpdateSchema.parse({ equipmentName: "Televisor" });
@@ -73,44 +66,5 @@ describe("Gerenciamento de documentos", () => {
       status: "CANCELADA",
       updatedById: "user",
     });
-  });
-});
-
-describe("Envio WAHA", () => {
-  const originalUrl = env.WAHA_URL;
-  afterEach(() => {
-    env.WAHA_URL = originalUrl;
-    jest.restoreAllMocks();
-  });
-  it("normaliza telefone brasileiro e rejeita destino invalido", () => {
-    expect(normalizeWhatsapp("(19) 99999-1234")).toBe("5519999991234");
-    expect(() => normalizeWhatsapp("abc")).toThrow("DDD");
-  });
-  it("envia o PDF em base64 somente ao destino informado", async () => {
-    env.WAHA_URL = "http://waha.test";
-    jest
-      .spyOn(QuotePdfService.prototype, "generate")
-      .mockResolvedValue({ fileName: "orcamento.pdf", buffer: Buffer.from("%PDF") });
-    const fetchMock = jest.spyOn(globalThis, "fetch").mockResolvedValue({ ok: true } as Response);
-    await expect(new DocumentWhatsappService().send("quote", "id", "19999991234")).resolves.toEqual(
-      { sent: true },
-    );
-    const body = JSON.parse(fetchMock.mock.calls[0][1]!.body as string);
-    expect(body.chatId).toBe("5519999991234@c.us");
-    expect(body.file).toEqual({
-      mimetype: "application/pdf",
-      filename: "orcamento.pdf",
-      data: Buffer.from("%PDF").toString("base64"),
-    });
-  });
-  it("nao informa sucesso quando WAHA rejeita", async () => {
-    env.WAHA_URL = "http://waha.test";
-    jest
-      .spyOn(QuotePdfService.prototype, "generate")
-      .mockResolvedValue({ fileName: "a.pdf", buffer: Buffer.from("%PDF") });
-    jest.spyOn(globalThis, "fetch").mockResolvedValue({ ok: false } as Response);
-    await expect(new DocumentWhatsappService().send("quote", "id", "19999991234")).rejects.toThrow(
-      "recusou",
-    );
   });
 });

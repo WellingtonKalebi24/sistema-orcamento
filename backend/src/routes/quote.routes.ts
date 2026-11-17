@@ -1,5 +1,3 @@
-import { z } from "zod";
-import { DocumentWhatsappController } from "../controllers/document-whatsapp.controller";
 import { Router } from "express";
 
 import { QuoteController } from "../controllers/quote.controller";
@@ -51,11 +49,4 @@ quoteRouter.post(
 
 quoteRouter.delete("/:id", authorize("ADMIN", "ATENDENTE"), (request, response) =>
   controller.remove(request, response),
-);
-
-quoteRouter.post(
-  "/:id/whatsapp",
-  authorize("ADMIN", "ATENDENTE"),
-  validateBody(z.object({ phone: z.string().min(8).max(30) })),
-  (request, response) => new DocumentWhatsappController().send("quote", request, response),
 );

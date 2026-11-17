@@ -8,17 +8,7 @@ Orcamentos sem OS/pagamentos vinculados podem ser editados; salvar devolve o doc
 
 Informe o telefone do destinatario, inclusive outra empresa. Abrir WhatsApp abre a conversa com mensagem pronta; o PDF deve ser baixado e anexado manualmente.
 
-Enviar PDF pelo WAHA pede confirmacao do numero e envia o PDF gerado pelo servidor. Configure no `.env` da VPS:
-
-```dotenv
-WAHA_URL=https://seu-servidor-waha
-WAHA_API_KEY=sua-chave
-WAHA_SESSION=default
-```
-
-WAHA_URL e a URL base sem /api. A sessao precisa estar conectada ao WhatsApp. A chave fica apenas no servidor. Nao ha repeticao automatica em caso de falha para evitar duplicidade. Em caso de timeout, confira a conversa antes de reenviar.
-
-Contrato do envio: [documentacao oficial WAHA](https://waha.devlike.pro/docs/how-to/send-messages/), POST /api/sendFile com PDF em base64. O servidor WAHA nao e instalado por esta atualizacao.
+Nao e necessario configurar WAHA. O envio da mensagem e confirmado pelo usuario no proprio WhatsApp.
 
 ## Atualizacao da VPS
 
@@ -29,9 +19,3 @@ bash scripts/update-vps.sh
 ```
 
 O script compila API e frontend, salva dump completo e uploads em backups/documentos-DATA-HORA, valida que o dump contem a tabela de usuarios e aplica as migracoes pendentes. A nova migracao apenas adiciona deletedAt a Quote e WorkOrder. Nao executa seed, reset, down ou remocao de volumes. A API fica brevemente indisponivel durante a migracao. Se ela falhar, o script inicia novamente o container anterior. Nao restaura backups automaticamente.
-
-Apos configurar WAHA depois da atualizacao, recrie apenas a API:
-
-```bash
-docker compose -f docker-compose.production.yml up -d --no-deps api
-```
